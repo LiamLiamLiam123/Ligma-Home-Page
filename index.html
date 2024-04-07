@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ligma Browser</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+        }
+        header {
+            background-color: #4CAF50;
+            color: white;
+            padding: 20px;
+            text-align: center;
+        }
+        h1 {
+            margin: 0;
+        }
+        nav {
+            background-color: #333;
+            overflow: hidden;
+        }
+        nav a {
+            float: left;
+            display: block;
+            color: white;
+            text-align: center;
+            padding: 14px 20px;
+            text-decoration: none;
+        }
+        nav a:hover {
+            background-color: #ddd;
+            color: black;
+        }
+        .container {
+            margin: auto;
+            padding: 20px;
+            max-width: 800px;
+        }
+        footer {
+            background-color: #4CAF50;
+            color: white;
+            padding: 10px 0;
+            text-align: center;
+            position: fixed;
+            left: 0;
+            bottom: 0;
+            width: 100%;
+        }
+        .search-container {
+            text-align: center;
+            margin-top: 20px;
+        }
+        .search-container input[type=text] {
+            padding: 10px;
+            width: 60%;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            outline: none;
+        }
+        .search-container input[type=submit] {
+            padding: 10px 20px;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+        .search-container input[type=submit]:hover {
+            background-color: #45a049;
+        }
+        /* Hide the About section initially */
+        #about {
+            display: none;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <h1>Welcome to Ligma Browser</h1>
+    </header>
+    <nav>
+        <a href="#">Home</a>
+        <a href="#about" onclick="showAbout()">About</a>
+    </nav>
+    <div class="container">
+        <div id="about">
+            <h2>About Ligma Browser</h2>
+            <p>Ligma Browser is a fast, secure, and customizable web browser designed to enhance your browsing experience.</p>
+            <h3>Key Features</h3>
+            <ul>
+                <li>Fast and efficient browsing</li>
+                <li>Customizable interface</li>
+                <li>Privacy protection</li>
+                <li>Support for extensions</li>
+            </ul>
+        </div>
+        <div class="search-container">
+            <h2>Search the Web</h2>
+            <form action="https://www.google.com/search" method="get" target="_blank">
+                <input type="text" name="q" placeholder="Search the web...">
+                <input type="submit" value="Search">
+            </form>
+        </div>
+    </div>
+    <footer>
+        <p>&copy; Liam Stephenson 2024. All rights reserved.</p>
+    </footer>
+    <script>
+        function showAbout() {
+            var aboutSection = document.getElementById("about");
+            aboutSection.style.display = "block";
+        }
+    </script>
+</body>
+</html>
