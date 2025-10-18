@@ -71,7 +71,6 @@
             <li>Customizable interface</li>
             <li>Privacy protection</li>
             <li>Support for extensions</li>
-            <li>My Dad is cute and I love him!</li>
             <li>You must have Python and install <b>PyQt5</b> and <b>PyQtWebEngine</b> to use the desktop version.<br>
                 In CMD: <code>pip install PyQt5</code> and <code>pip install PyQtWebEngine</code></li>
         </ul>
@@ -110,9 +109,9 @@ function showAbout() {
 
 async function search() {
     const query = document.getElementById('query').value.trim();
-    if (!query) return alert("Enter a search term!");
-
     const resultsDiv = document.getElementById('results');
+
+    if (!query) return alert("Enter a search term!");
     resultsDiv.innerHTML = `<p>Searching the web for "${query}"...</p>`;
 
     const url = `https://duckduckgo.com/html/?q=${encodeURIComponent(query)}`;
@@ -134,10 +133,7 @@ async function search() {
         }
 
         links.forEach((link, i) => {
-            // Extract and clean the real target URL
             let href = link.getAttribute("href");
-
-            // Grab actual destination from DuckDuckGo redirect
             if (href.includes("uddg=")) {
                 try {
                     href = decodeURIComponent(href.split("uddg=")[1]);
@@ -145,19 +141,18 @@ async function search() {
                     console.warn("Error decoding URL:", err);
                 }
             }
-
-            // Remove any leftover &rut= or other junk
             href = href.split("&rut=")[0];
-
-            // Decode double-encoded links (e.g., https%3A)
             if (href.startsWith("https%3A%2F%2F") || href.startsWith("http%3A%2F%2F")) {
                 href = decodeURIComponent(href);
             }
 
             const a = document.createElement("a");
-            a.href = href;
-            a.target = "_blank"; // open in new tab
+            a.href = "#";
             a.textContent = link.textContent;
+            a.onclick = () => {
+                window.location.href = href; // Redirect directly!
+                return false;
+            };
 
             const p = document.createElement("p");
             p.textContent = snippets[i]?.textContent || "";
