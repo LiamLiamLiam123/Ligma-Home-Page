@@ -5,169 +5,689 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Ligma Browser</title>
 <style>
-    body { font-family: Arial, sans-serif; margin: 0; padding: 0; }
-    header { background-color: #4CAF50; color: white; padding: 20px; text-align: center; }
+    * { box-sizing: border-box; }
+
+    :root {
+        --accent: #4CAF50;
+        --accent-dark: #45a049;
+        --nav-bg: #333;
+        --body-bg: #ffffff;
+        --body-color: #000000;
+        --font-family: Arial, sans-serif;
+        --font-size: 16px;
+        --container-width: 900px;
+        --spacing: 20px;
+        --result-bg: #ffffff;
+        --border-radius: 8px;
+    }
+
+    body {
+        font-family: var(--font-family);
+        font-size: var(--font-size);
+        margin: 0; padding: 0;
+        background-color: var(--body-bg);
+        background-size: cover; background-position: center; background-attachment: fixed;
+        color: var(--body-color);
+        transition: background-color 0.3s, color 0.3s;
+    }
+
+    header { background-color: var(--accent); color: white; padding: var(--spacing); text-align: center; transition: background-color 0.3s; }
     h1 { margin: 0; }
-    nav { background-color: #333; overflow: hidden; }
-    nav a {
-        float: left; display: block; color: white; text-align: center;
-        padding: 14px 20px; text-decoration: none;
-    }
+
+    nav { background-color: var(--nav-bg); overflow: hidden; transition: background-color 0.3s; }
+    nav a { float: left; display: block; color: white; text-align: center; padding: 14px 20px; text-decoration: none; font-size: 14px; }
     nav a:hover { background-color: #ddd; color: black; }
-    .container { margin: auto; padding: 20px; max-width: 900px; }
-    footer {
-        background-color: #4CAF50; color: white; padding: 10px 0;
-        text-align: center; position: fixed; left: 0; bottom: 0; width: 100%;
+    nav a.active { background-color: var(--accent); }
+
+    .container { margin: 0 auto; padding: var(--spacing); max-width: var(--container-width); padding-bottom: 70px; }
+    footer { background-color: var(--accent); color: white; padding: 10px 0; text-align: center; position: fixed; left: 0; bottom: 0; width: 100%; transition: background-color 0.3s; }
+
+    /* ── Pages ── */
+    .page { display: none; }
+    .page.active { display: block; }
+
+    /* ── Logo ── */
+    .search-container { text-align: center; padding-top: 80px; }
+    .ligma-logo { font-size: 72px; font-weight: bold; font-family: Arial, sans-serif; letter-spacing: -2px; margin-bottom: 40px; line-height: 1; }
+    .logo-text {
+        background: linear-gradient(90deg, #1a7a2e 0%, #4CAF50 20%, #a8f0b8 40%, #4CAF50 60%, #1a7a2e 80%, #4CAF50 100%);
+        background-size: 200% 100%;
+        -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
+        animation: logoSlide 4s linear infinite;
     }
-    .search-container { text-align: center; margin-top: 20px; }
+    @keyframes logoSlide { from { background-position: 200% 0; } to { background-position: 0% 0; } }
+
+    /* ── Search bar ── */
     .search-container input[type=text] {
         padding: 10px; width: 60%; border: 1px solid #ccc; border-radius: 5px; outline: none;
+        font-size: var(--font-size); font-family: var(--font-family);
+        background: var(--body-bg); color: var(--body-color); margin-bottom: 12px;
     }
     .search-container button {
-        padding: 10px 20px; background-color: #4CAF50; color: white;
-        border: none; border-radius: 5px; cursor: pointer;
-        transition: background-color 0.3s;
+        padding: 10px 20px; background-color: var(--accent); color: white;
+        border: none; border-radius: 5px; cursor: pointer; transition: background-color 0.3s; font-size: var(--font-size);
     }
-    .search-container button:hover { background-color: #45a049; }
-    #results { max-width: 800px; margin: 30px auto; padding: 10px; }
-    .result {
-        margin-bottom: 20px; padding: 15px;
-        border-radius: 8px; box-shadow: 0 2px 6px rgba(0,0,0,0.1);
-    }
+    .search-container button:hover { background-color: var(--accent-dark); }
+
+    /* ── Results ── */
+    #results { max-width: 800px; margin: 30px auto; padding: 10px; text-align: center; }
+    .result { margin-bottom: 20px; padding: 15px; border-radius: var(--border-radius); box-shadow: 0 2px 6px rgba(0,0,0,0.1); background: var(--result-bg); text-align: left; }
+    .result-title-row { display: flex; align-items: center; gap: 10px; margin-bottom: 4px; }
+    .result-favicon { width: 16px; height: 16px; border-radius: 2px; flex-shrink: 0; }
     .result a { color: #1a0dab; font-size: 18px; text-decoration: none; }
     .result a:hover { text-decoration: underline; }
-    .result p { color: #333; }
-    #about { display: none; margin-top: 20px; }
-    .download-section {
-        text-align: center; margin-top: 20px;
+    .result-url { color: #006621; font-size: 13px; margin-bottom: 4px; padding-left: 26px; }
+    .result p { color: var(--body-color); opacity: 0.8; margin: 0; padding-left: 26px; }
+
+    /* ── Spinner ── */
+    .loading { text-align: center; padding: 30px; color: #555; }
+    .spinner { display: inline-block; width: 32px; height: 32px; border: 4px solid #ccc; border-top-color: var(--accent); border-radius: 50%; animation: spin 0.7s linear infinite; margin-bottom: 8px; }
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    /* ── About ── */
+    #about { text-align: center; }
+    #about ul { display: inline-block; text-align: left; }
+
+    /* ── Download ── */
+    #download { text-align: center; }
+    #download h2 { margin-bottom: 8px; }
+    #download p { margin: 6px 0; }
+    #download .btn { display: inline-block; padding: 10px 20px; background-color: var(--accent); color: white; text-decoration: none; border-radius: 5px; transition: background-color 0.3s; margin-top: 8px; }
+    #download .btn:hover { background-color: var(--accent-dark); }
+
+    /* ── Bookmarks ── */
+    #bookmarks h2 { text-align: center; }
+    .bookmark-add { display: flex; gap: 8px; margin-bottom: 20px; flex-wrap: wrap; justify-content: center; }
+    .bookmark-add input { flex: 1; min-width: 160px; padding: 8px; border: 1px solid #ccc; border-radius: 5px; background: var(--body-bg); color: var(--body-color); font-size: 14px; }
+    .bookmark-add button { padding: 8px 16px; background: var(--accent); color: white; border: none; border-radius: 5px; cursor: pointer; }
+    .bookmark-add button:hover { background: var(--accent-dark); }
+    .bookmark-list { max-width: 700px; margin: 0 auto; }
+    .bookmark-item { display: flex; align-items: center; gap: 10px; padding: 10px 14px; border-radius: var(--border-radius); box-shadow: 0 1px 4px rgba(0,0,0,0.1); margin-bottom: 10px; background: var(--result-bg); }
+    .bookmark-item img { width: 16px; height: 16px; }
+    .bookmark-item a { flex: 1; color: #1a0dab; text-decoration: none; font-size: 15px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .bookmark-item a:hover { text-decoration: underline; }
+    .bookmark-item .bm-del { background: #e74c3c; color: white; border: none; border-radius: 4px; padding: 4px 10px; cursor: pointer; font-size: 12px; }
+    .no-items { text-align: center; color: #888; padding: 30px; }
+
+    /* ── History ── */
+    #history h2 { text-align: center; }
+    .history-controls { text-align: center; margin-bottom: 16px; }
+    .history-controls button { padding: 7px 16px; background: #e74c3c; color: white; border: none; border-radius: 5px; cursor: pointer; }
+    .history-list { max-width: 700px; margin: 0 auto; }
+    .history-item { display: flex; align-items: center; gap: 10px; padding: 9px 14px; border-radius: var(--border-radius); box-shadow: 0 1px 4px rgba(0,0,0,0.08); margin-bottom: 8px; background: var(--result-bg); }
+    .history-item img { width: 16px; height: 16px; }
+    .history-item .h-query { flex: 1; font-size: 15px; cursor: pointer; color: #1a0dab; }
+    .history-item .h-query:hover { text-decoration: underline; }
+    .history-item .h-time { font-size: 12px; color: #888; white-space: nowrap; }
+
+    /* ── Settings ── */
+    #settings { max-width: 660px; margin: 0 auto; }
+    #settings h2 { text-align: center; color: var(--accent); }
+    .settings-tabs { display: flex; gap: 6px; margin-bottom: 20px; flex-wrap: wrap; }
+    .stab { padding: 8px 18px; border: 2px solid var(--accent); border-radius: 5px; cursor: pointer; background: transparent; color: var(--body-color); font-size: 14px; font-weight: bold; transition: all 0.2s; }
+    .stab.active { background: var(--accent); color: white; }
+    .stab-panel { display: none; }
+    .stab-panel.active { display: block; }
+    .setting-group { margin-bottom: 18px; }
+    .setting-group label { display: block; font-weight: bold; margin-bottom: 6px; color: var(--body-color); }
+    .setting-group input[type=color] { width: 48px; height: 32px; border: none; cursor: pointer; border-radius: 4px; padding: 0; }
+    .setting-group select, .setting-group input[type=range], .setting-group input[type=url], .setting-group input[type=text] {
+        width: 100%; padding: 8px; border-radius: 5px; border: 1px solid #ccc; font-size: 14px; background: var(--body-bg); color: var(--body-color);
     }
-    .download-section a {
-        display: inline-block; padding: 10px 20px; background-color: #4CAF50;
-        color: white; text-decoration: none; border-radius: 5px;
-        transition: background-color 0.3s;
+    .setting-group input[type=range] { padding: 4px 0; }
+    .setting-row { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }
+    .setting-row span { font-size: 13px; color: var(--body-color); opacity: 0.7; min-width: 40px; }
+    .settings-btn-row { display: flex; gap: 10px; justify-content: center; margin-top: 16px; }
+    .settings-btn-row button { padding: 10px 24px; border: none; border-radius: 5px; cursor: pointer; font-size: 15px; font-weight: bold; }
+    #applyBtn { background-color: var(--accent); color: white; }
+    #applyBtn:hover { background-color: var(--accent-dark); }
+    #resetBtn { background-color: #ccc; color: #333; }
+    #resetBtn:hover { background-color: #bbb; }
+
+    /* ── Dark mode ── */
+    body.dark {
+        --body-bg: #1a1a1a; --body-color: #f0f0f0; --nav-bg: #111;
+        --result-bg: #242424;
     }
-    .download-section a:hover { background-color: #45a049; }
+    body.dark .result, body.dark .bookmark-item, body.dark .history-item { box-shadow: 0 2px 6px rgba(0,0,0,0.4); }
+    body.dark .search-container input[type=text],
+    body.dark .bookmark-add input,
+    body.dark .setting-group select,
+    body.dark .setting-group input[type=url],
+    body.dark .setting-group input[type=text] { border-color: #444; }
 </style>
 </head>
 <body>
+
 <header>
     <h1>Welcome to Ligma Browser Home Page</h1>
 </header>
 
-<nav>
-    <a href="#">Home</a>
-    <a href="#about" onclick="showAbout()">About</a>
+<nav id="mainnav">
+    <a href="#" onclick="showPage('home'); return false;">Home</a>
+    <a href="#" onclick="showPage('bookmarks'); return false;">⭐ Bookmarks</a>
+    <a href="#" onclick="showPage('history'); return false;">🕐 History</a>
+    <a href="#" onclick="showPage('about'); return false;">About</a>
+    <a href="#" onclick="showPage('download'); return false;">Download</a>
+    <a href="#" onclick="showPage('settings'); return false;">⚙ Settings</a>
 </nav>
 
 <div class="container">
 
-    <!-- About section -->
-    <div id="about">
+    <!-- Home -->
+    <div id="home" class="page">
+        <div class="search-container">
+            <div class="ligma-logo"><span class="logo-text">Ligma Browser</span></div>
+            <input type="text" id="query" placeholder="Search the web..." onkeypress="if(event.key==='Enter'){doSearch()}">
+            <button onclick="doSearch()">Search</button>
+        </div>
+        <div id="results"></div>
+    </div>
+
+    <!-- Bookmarks -->
+    <div id="bookmarks" class="page">
+        <h2>⭐ Bookmarks</h2>
+        <div class="bookmark-add">
+            <input type="text" id="bm-title" placeholder="Title">
+            <input type="url" id="bm-url" placeholder="https://example.com">
+            <button onclick="addBookmark()">+ Add</button>
+        </div>
+        <div class="bookmark-list" id="bookmark-list"></div>
+    </div>
+
+    <!-- History -->
+    <div id="history" class="page">
+        <h2>🕐 Search History</h2>
+        <div class="history-controls">
+            <button onclick="clearHistory()">🗑 Clear History</button>
+        </div>
+        <div class="history-list" id="history-list"></div>
+    </div>
+
+    <!-- About -->
+    <div id="about" class="page">
         <h2>About Ligma Browser</h2>
         <p>Ligma Browser is a fast, secure, and customizable web browser designed to enhance your browsing experience.</p>
         <h3>Key Features</h3>
         <ul>
             <li>Fast and efficient browsing</li>
-            <li>Customizable interface</li>
-            <li>Privacy protection</li>
+            <li>Customizable interface — change themes, layouts, and settings to suit your style</li>
+            <li>Privacy protection — no tracking, no ads, your data stays yours</li>
             <li>Support for extensions</li>
             <li>You must have Python and install <b>PyQt5</b> and <b>PyQtWebEngine</b> to use the desktop version.<br>
                 In CMD: <code>pip install PyQt5</code> and <code>pip install PyQtWebEngine</code></li>
         </ul>
-        <div>
-            <a href="https://liamliamliam123.github.io/Ligma-Home-Page/">Home But You Can Destroy</a>
+        <div><a href="https://liamliamliam123.github.io/Ligma-Home-Page/">Home But You Can Destroy</a></div>
+    </div>
+
+    <!-- Download -->
+    <div id="download" class="page">
+        <h2>Download Ligma Browser</h2>
+        <p>Before downloading, check the About section for requirements.</p>
+        <p>You need Python with <b>PyQt5</b> and <b>PyQtWebEngine</b> installed.</p>
+        <p><code>pip install PyQt5 PyQtWebEngine</code></p>
+        <a class="btn" href="Ligma Browser.py" download>Download Ligma Browser.py</a>
+    </div>
+
+    <!-- Settings -->
+    <div id="settings" class="page">
+        <h2>⚙ Settings</h2>
+
+        <div class="settings-tabs">
+            <button class="stab active" onclick="showStab('appearance', this)">🎨 Appearance</button>
+            <button class="stab" onclick="showStab('layout', this)">📐 Layout</button>
+            <button class="stab" onclick="showStab('search', this)">🔍 Search</button>
+        </div>
+
+        <!-- Appearance -->
+        <div id="stab-appearance" class="stab-panel active">
+            <div class="setting-group">
+                <label>Theme</label>
+                <select id="s-theme">
+                    <option value="light">☀️ Light</option>
+                    <option value="dark">🌙 Dark</option>
+                </select>
+            </div>
+            <div class="setting-group">
+                <label>Accent Colour</label>
+                <div class="setting-row">
+                    <input type="color" id="s-accent" value="#4CAF50">
+                    <span id="s-accent-val">#4CAF50</span>
+                </div>
+            </div>
+            <div class="setting-group">
+                <label>Nav Bar Colour</label>
+                <div class="setting-row">
+                    <input type="color" id="s-navcolor" value="#333333">
+                    <span id="s-navcolor-val">#333333</span>
+                </div>
+            </div>
+            <div class="setting-group">
+                <label>Font Style</label>
+                <select id="s-font">
+                    <option value="Arial, sans-serif">Arial (Default)</option>
+                    <option value="Georgia, serif">Georgia</option>
+                    <option value="'Courier New', monospace">Courier New</option>
+                    <option value="Verdana, sans-serif">Verdana</option>
+                    <option value="Tahoma, sans-serif">Tahoma</option>
+                    <option value="'Times New Roman', serif">Times New Roman</option>
+                    <option value="Impact, sans-serif">Impact</option>
+                    <option value="'Trebuchet MS', sans-serif">Trebuchet MS</option>
+                </select>
+            </div>
+            <div class="setting-group">
+                <label>Font Size — <span id="s-size-val">16</span>px</label>
+                <div class="setting-row">
+                    <span>12</span>
+                    <input type="range" id="s-size" min="12" max="24" value="16" oninput="document.getElementById('s-size-val').textContent=this.value">
+                    <span>24</span>
+                </div>
+            </div>
+            <div class="setting-group">
+                <label>Background Image URL <small>(leave blank for none)</small></label>
+                <input type="url" id="s-bgimg" placeholder="https://example.com/image.jpg">
+            </div>
+            <div class="setting-group">
+                <label>Result Card Style</label>
+                <select id="s-cardstyle">
+                    <option value="8px">Rounded (Default)</option>
+                    <option value="0px">Sharp</option>
+                    <option value="16px">Extra Rounded</option>
+                </select>
+            </div>
+        </div>
+
+        <!-- Layout -->
+        <div id="stab-layout" class="stab-panel">
+            <div class="setting-group">
+                <label>Page Width</label>
+                <select id="s-width">
+                    <option value="700px">Narrow (700px)</option>
+                    <option value="900px" selected>Normal (900px)</option>
+                    <option value="1100px">Wide (1100px)</option>
+                    <option value="100%">Full Width</option>
+                </select>
+            </div>
+            <div class="setting-group">
+                <label>Spacing</label>
+                <select id="s-spacing">
+                    <option value="10px">Compact</option>
+                    <option value="20px" selected>Normal</option>
+                    <option value="34px">Spacious</option>
+                </select>
+            </div>
+            <div class="setting-group">
+                <label>Header Text</label>
+                <input type="text" id="s-header" placeholder="Welcome to Ligma Browser Home Page">
+            </div>
+            <div class="setting-group">
+                <label>Footer Text</label>
+                <input type="text" id="s-footer" placeholder="© Liam Stephenson 2024. All rights reserved.">
+            </div>
+        </div>
+
+        <!-- Search -->
+        <div id="stab-search" class="stab-panel">
+            <div class="setting-group">
+                <label>Results Per Page</label>
+                <select id="s-results">
+                    <option value="5">5 results</option>
+                    <option value="10" selected>10 results</option>
+                    <option value="20">20 results (slower)</option>
+                </select>
+            </div>
+            <div class="setting-group">
+                <label>Open Results In</label>
+                <select id="s-target">
+                    <option value="_blank">New Tab (Default)</option>
+                    <option value="_self">Same Tab</option>
+                </select>
+            </div>
+            <div class="setting-group">
+                <label>Show Favicons</label>
+                <select id="s-favicons">
+                    <option value="yes">Yes (Default)</option>
+                    <option value="no">No</option>
+                </select>
+            </div>
+            <div class="setting-group">
+                <label>Show Search History</label>
+                <select id="s-savehistory">
+                    <option value="yes">Yes (Default)</option>
+                    <option value="no">No</option>
+                </select>
+            </div>
+        </div>
+
+        <div class="settings-btn-row">
+            <button id="applyBtn" onclick="applySettings()">Apply</button>
+            <button id="resetBtn" onclick="resetSettings()">Reset to Default</button>
         </div>
     </div>
 
-    <!-- Search system -->
-    <div class="search-container">
-        <h2>Search the Web (Ligma Search)</h2>
-        <input type="text" id="query" placeholder="Search the web..." onkeypress="if(event.key === 'Enter'){search()}">
-        <button onclick="search()">Search</button>
-    </div>
-
-    <div id="results"></div>
-
-    <!-- Download section -->
-    <div class="download-section">
-        <h2>Download Ligma Browser</h2>
-        <p>Before Downloading look at the About section</p>
-        <p>Download the Ligma Browser file:</p>
-        <a href="Ligma Browser.py" download>Download Ligma Browser.py</a>
-    </div>
 </div>
 
-<footer>
-    <p>&copy; Liam Stephenson 2024. All rights reserved.</p>
-</footer>
+<footer><p id="footer-text">&copy; Liam Stephenson 2024. All rights reserved.</p></footer>
 
 <script>
-function showAbout() {
-    const aboutSection = document.getElementById("about");
-    aboutSection.style.display = aboutSection.style.display === "block" ? "none" : "block";
+// ── State ──
+const state = {
+    bookmarks: [],   // { title, url }
+    history:   [],   // { query, time }
+    settings: {
+        target: '_blank',
+        maxResults: 10,
+        showFavicons: true,
+        saveHistory: true,
+    }
+};
+
+// ── Navigation ──
+const PAGES = ['home','bookmarks','history','about','download','settings'];
+function showPage(page) {
+    PAGES.forEach(id => {
+        const el = document.getElementById(id);
+        el.classList.toggle('active', id === page);
+    });
+    document.querySelectorAll('#mainnav a').forEach(a => {
+        a.classList.toggle('active', a.getAttribute('onclick').includes(`'${page}'`));
+    });
+    if (page === 'bookmarks') renderBookmarks();
+    if (page === 'history')   renderHistory();
+}
+showPage('home');
+
+// ── Settings sub-tabs ──
+function showStab(name, btn) {
+    document.querySelectorAll('.stab-panel').forEach(p => p.classList.remove('active'));
+    document.querySelectorAll('.stab').forEach(b => b.classList.remove('active'));
+    document.getElementById('stab-' + name).classList.add('active');
+    btn.classList.add('active');
 }
 
-async function search() {
+// ── Apply Settings ──
+function applySettings() {
+    const root = document.documentElement;
+    const accent   = document.getElementById('s-accent').value;
+    const navcolor = document.getElementById('s-navcolor').value;
+    const font     = document.getElementById('s-font').value;
+    const size     = document.getElementById('s-size').value + 'px';
+    const bg       = document.getElementById('s-bgimg').value.trim();
+    const width    = document.getElementById('s-width').value;
+    const spacing  = document.getElementById('s-spacing').value;
+    const card     = document.getElementById('s-cardstyle').value;
+    const theme    = document.getElementById('s-theme').value;
+    const header   = document.getElementById('s-header').value.trim();
+    const footer   = document.getElementById('s-footer').value.trim();
+
+    root.style.setProperty('--accent', accent);
+    root.style.setProperty('--accent-dark', shadeColor(accent, -10));
+    root.style.setProperty('--nav-bg', navcolor);
+    root.style.setProperty('--font-family', font);
+    root.style.setProperty('--font-size', size);
+    root.style.setProperty('--container-width', width);
+    root.style.setProperty('--spacing', spacing);
+    root.style.setProperty('--border-radius', card);
+
+    // Theme — set explicit bg/color so settings override body.dark
+    if (theme === 'dark') {
+        document.body.classList.add('dark');
+        root.style.setProperty('--body-bg', '#1a1a1a');
+        root.style.setProperty('--body-color', '#f0f0f0');
+        root.style.setProperty('--result-bg', '#242424');
+    } else {
+        document.body.classList.remove('dark');
+        root.style.setProperty('--body-bg', '#ffffff');
+        root.style.setProperty('--body-color', '#000000');
+        root.style.setProperty('--result-bg', '#ffffff');
+    }
+
+    document.body.style.backgroundImage = bg ? `url('${bg}')` : '';
+    if (header) document.querySelector('header h1').textContent = header;
+    if (footer) document.getElementById('footer-text').textContent = footer;
+
+    // Search settings
+    state.settings.target      = document.getElementById('s-target').value;
+    state.settings.maxResults  = parseInt(document.getElementById('s-results').value);
+    state.settings.showFavicons = document.getElementById('s-favicons').value === 'yes';
+    state.settings.saveHistory  = document.getElementById('s-savehistory').value === 'yes';
+
+    alert('Settings applied!');
+}
+
+function resetSettings() {
+    const root = document.documentElement;
+    root.style.setProperty('--accent', '#4CAF50');
+    root.style.setProperty('--accent-dark', '#45a049');
+    root.style.setProperty('--nav-bg', '#333333');
+    root.style.setProperty('--font-family', 'Arial, sans-serif');
+    root.style.setProperty('--font-size', '16px');
+    root.style.setProperty('--container-width', '900px');
+    root.style.setProperty('--spacing', '20px');
+    root.style.setProperty('--border-radius', '8px');
+    root.style.setProperty('--body-bg', '#ffffff');
+    root.style.setProperty('--body-color', '#000000');
+    root.style.setProperty('--result-bg', '#ffffff');
+    document.body.classList.remove('dark');
+    document.body.style.backgroundImage = '';
+    document.querySelector('header h1').textContent = 'Welcome to Ligma Browser Home Page';
+    document.getElementById('footer-text').textContent = '© Liam Stephenson 2024. All rights reserved.';
+
+    document.getElementById('s-theme').value    = 'light';
+    document.getElementById('s-accent').value   = '#4CAF50';
+    document.getElementById('s-accent-val').textContent = '#4CAF50';
+    document.getElementById('s-navcolor').value = '#333333';
+    document.getElementById('s-navcolor-val').textContent = '#333333';
+    document.getElementById('s-font').value     = 'Arial, sans-serif';
+    document.getElementById('s-size').value     = '16';
+    document.getElementById('s-size-val').textContent = '16';
+    document.getElementById('s-bgimg').value    = '';
+    document.getElementById('s-cardstyle').value = '8px';
+    document.getElementById('s-width').value    = '900px';
+    document.getElementById('s-spacing').value  = '20px';
+    document.getElementById('s-header').value   = '';
+    document.getElementById('s-footer').value   = '';
+    document.getElementById('s-target').value   = '_blank';
+    document.getElementById('s-results').value  = '10';
+    document.getElementById('s-favicons').value = 'yes';
+    document.getElementById('s-savehistory').value = 'yes';
+
+    state.settings = { target: '_blank', maxResults: 10, showFavicons: true, saveHistory: true };
+}
+
+document.getElementById('s-accent').addEventListener('input', function() {
+    document.getElementById('s-accent-val').textContent = this.value;
+});
+document.getElementById('s-navcolor').addEventListener('input', function() {
+    document.getElementById('s-navcolor-val').textContent = this.value;
+});
+
+function shadeColor(hex, percent) {
+    const num = parseInt(hex.replace('#',''), 16);
+    const r = Math.min(255, Math.max(0, (num >> 16) + percent));
+    const g = Math.min(255, Math.max(0, ((num >> 8) & 0xff) + percent));
+    const b = Math.min(255, Math.max(0, (num & 0xff) + percent));
+    return '#' + [r,g,b].map(x => x.toString(16).padStart(2,'0')).join('');
+}
+
+// ── Bookmarks ──
+function addBookmark() {
+    const title = document.getElementById('bm-title').value.trim();
+    const url   = document.getElementById('bm-url').value.trim();
+    if (!url) return alert('Enter a URL');
+    state.bookmarks.unshift({ title: title || url, url });
+    document.getElementById('bm-title').value = '';
+    document.getElementById('bm-url').value   = '';
+    renderBookmarks();
+}
+function removeBookmark(i) {
+    state.bookmarks.splice(i, 1);
+    renderBookmarks();
+}
+function renderBookmarks() {
+    const list = document.getElementById('bookmark-list');
+    if (!state.bookmarks.length) {
+        list.innerHTML = '<div class="no-items">No bookmarks yet. Add one above!</div>';
+        return;
+    }
+    list.innerHTML = '';
+    state.bookmarks.forEach((bm, i) => {
+        let hostname = ''; try { hostname = new URL(bm.url).hostname; } catch(e) {}
+        const div = document.createElement('div');
+        div.className = 'bookmark-item';
+        div.innerHTML = `
+            <img src="https://www.google.com/s2/favicons?domain=${hostname}&sz=32" onerror="this.style.display='none'" alt="">
+            <a href="${escHtml(bm.url)}" target="${state.settings.target}" rel="noopener noreferrer">${escHtml(bm.title)}</a>
+            <button class="bm-del" onclick="removeBookmark(${i})">✕</button>`;
+        list.appendChild(div);
+    });
+}
+
+// ── History ──
+function addHistory(query) {
+    if (!state.settings.saveHistory) return;
+    state.history.unshift({ query, time: new Date().toLocaleTimeString() });
+    if (state.history.length > 50) state.history.pop();
+}
+function clearHistory() {
+    state.history = [];
+    renderHistory();
+}
+function renderHistory() {
+    const list = document.getElementById('history-list');
+    if (!state.history.length) {
+        list.innerHTML = '<div class="no-items">No search history yet.</div>';
+        return;
+    }
+    list.innerHTML = '';
+    state.history.forEach(h => {
+        const div = document.createElement('div');
+        div.className = 'history-item';
+        div.innerHTML = `
+            <span class="h-query" onclick="reSearch('${escHtml(h.query)}')">${escHtml(h.query)}</span>
+            <span class="h-time">${h.time}</span>`;
+        list.appendChild(div);
+    });
+}
+function reSearch(query) {
+    document.getElementById('query').value = query;
+    showPage('home');
+    doSearch();
+}
+
+// ── Search ──
+const searchCache = {};
+
+async function fetchSearch(query) {
+    const key = query.toLowerCase().trim();
+    if (searchCache[key]) return searchCache[key];
+
+    const ddgUrl = `https://html.duckduckgo.com/html/?q=${encodeURIComponent(query)}`;
+    const attempts = [
+        () => fetch(`https://proxy.corsfix.com/?${ddgUrl}`, { signal: AbortSignal.timeout(8000) })
+                .then(r => { if (!r.ok) throw 0; return r.text(); })
+                .then(t => { if (!t.includes('result__a')) throw 0; return t; }),
+        () => fetch(`https://api.allorigins.win/get?url=${encodeURIComponent(ddgUrl)}`, { signal: AbortSignal.timeout(8000) })
+                .then(r => { if (!r.ok) throw 0; return r.json(); })
+                .then(d => { if (!d.contents?.includes('result__a')) throw 0; return d.contents; }),
+        () => fetch(`https://corsproxy.io/?${encodeURIComponent(ddgUrl)}`, { signal: AbortSignal.timeout(8000) })
+                .then(r => { if (!r.ok) throw 0; return r.text(); })
+                .then(t => { if (!t.includes('result__a')) throw 0; return t; }),
+        () => fetch(`https://thingproxy.freeboard.io/fetch/${ddgUrl}`, { signal: AbortSignal.timeout(8000) })
+                .then(r => { if (!r.ok) throw 0; return r.text(); })
+                .then(t => { if (!t.includes('result__a')) throw 0; return t; }),
+    ];
+
+    return new Promise((resolve, reject) => {
+        let done = false, fails = 0;
+        attempts.forEach(fn => {
+            fn().then(html => {
+                if (!done) { done = true; searchCache[key] = html; resolve(html); }
+            }).catch(() => { fails++; if (fails === attempts.length && !done) reject(); });
+        });
+    });
+}
+
+function parseDDG(html) {
+    const doc = new DOMParser().parseFromString(html, 'text/html');
+    const links = [...doc.querySelectorAll('.result__a')];
+    const snippets = [...doc.querySelectorAll('.result__snippet')];
+    return links.map((link, i) => {
+        let href = link.getAttribute('href') || '';
+        if (href.includes('uddg=')) { try { href = decodeURIComponent(href.split('uddg=')[1]); } catch(e) {} }
+        href = href.split('&rut=')[0];
+        if (href.startsWith('https%3A') || href.startsWith('http%3A')) { try { href = decodeURIComponent(href); } catch(e) {} }
+        let hostname = ''; try { hostname = new URL(href).hostname.replace(/^www\./, ''); } catch(e) {}
+        return { title: link.textContent.trim(), href, hostname, snippet: snippets[i]?.textContent.trim() || '' };
+    }).filter(r => r.href.startsWith('http'));
+}
+
+async function doSearch() {
     const query = document.getElementById('query').value.trim();
     const resultsDiv = document.getElementById('results');
-
     if (!query) return alert("Enter a search term!");
-    resultsDiv.innerHTML = `<p>Searching the web for "${query}"...</p>`;
 
-    const url = `https://duckduckgo.com/html/?q=${encodeURIComponent(query)}`;
+    addHistory(query);
 
-    try {
-        const res = await fetch(`https://api.allorigins.win/get?url=${encodeURIComponent(url)}`);
-        const data = await res.json();
-        const html = data.contents;
+    resultsDiv.innerHTML = `
+        <div class="loading">
+            <div class="spinner"></div>
+            <div>Searching for "<strong>${escHtml(query)}</strong>"...</div>
+        </div>`;
 
-        const parser = new DOMParser();
-        const doc = parser.parseFromString(html, "text/html");
-        const links = [...doc.querySelectorAll(".result__a")];
-        const snippets = [...doc.querySelectorAll(".result__snippet")];
+    let html;
+    try { html = await fetchSearch(query); }
+    catch(e) {
+        resultsDiv.innerHTML = `<p style="text-align:center">Search failed — all sources unavailable. Try again later.</p>`;
+        return;
+    }
 
-        resultsDiv.innerHTML = "";
-        if (links.length === 0) {
-            resultsDiv.innerHTML = `<p>No results found.</p>`;
-            return;
+    const items = parseDDG(html).slice(0, state.settings.maxResults);
+    resultsDiv.innerHTML = '';
+    if (!items.length) { resultsDiv.innerHTML = `<p style="text-align:center">No results found.</p>`; return; }
+
+    const frag = document.createDocumentFragment();
+    items.forEach(r => {
+        const div = document.createElement('div');
+        div.className = 'result';
+
+        const titleRow = document.createElement('div');
+        titleRow.className = 'result-title-row';
+
+        if (state.settings.showFavicons && r.hostname) {
+            const img = document.createElement('img');
+            img.className = 'result-favicon';
+            img.src = `https://www.google.com/s2/favicons?domain=${r.hostname}&sz=32`;
+            img.alt = ''; img.onerror = () => { img.style.display='none'; };
+            titleRow.appendChild(img);
         }
 
-        links.forEach((link, i) => {
-            let href = link.getAttribute("href");
-            if (href.includes("uddg=")) {
-                try {
-                    href = decodeURIComponent(href.split("uddg=")[1]);
-                } catch (err) {
-                    console.warn("Error decoding URL:", err);
-                }
-            }
-            href = href.split("&rut=")[0];
-            if (href.startsWith("https%3A%2F%2F") || href.startsWith("http%3A%2F%2F")) {
-                href = decodeURIComponent(href);
-            }
+        const a = document.createElement('a');
+        a.href = r.href; a.target = state.settings.target; a.rel = 'noopener noreferrer';
+        a.textContent = r.title;
+        titleRow.appendChild(a);
 
-            const a = document.createElement("a");
-            a.href = "#";
-            a.textContent = link.textContent;
-            a.onclick = () => {
-                window.location.href = href; // Redirect directly!
-                return false;
-            };
+        const urlEl = document.createElement('div');
+        urlEl.className = 'result-url'; urlEl.textContent = r.hostname;
 
-            const p = document.createElement("p");
-            p.textContent = snippets[i]?.textContent || "";
+        const p = document.createElement('p');
+        p.textContent = r.snippet;
 
-            const div = document.createElement("div");
-            div.className = "result";
-            div.appendChild(a);
-            div.appendChild(p);
+        div.appendChild(titleRow); div.appendChild(urlEl); div.appendChild(p);
+        frag.appendChild(div);
+    });
+    resultsDiv.appendChild(frag);
+}
 
-            resultsDiv.appendChild(div);
-        });
-    } catch (e) {
-        resultsDiv.innerHTML = `<p>Something went wrong. Try again later.</p>`;
-        console.error(e);
-    }
+let prefetchTimer = null;
+document.getElementById('query').addEventListener('input', function() {
+    clearTimeout(prefetchTimer);
+    const q = this.value.trim();
+    if (q.length > 3) prefetchTimer = setTimeout(() => fetchSearch(q).catch(() => {}), 400);
+});
+
+function escHtml(s) {
+    return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
 }
 </script>
 </body>
