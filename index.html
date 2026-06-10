@@ -54,34 +54,25 @@ footer { background-color: var(--accent); color: white; padding: 10px 0; text-al
 
 .logo-text {
     display: inline-block;
-    /* Seamless: gradient is 4 identical segments so 0% and 100% are the same colour */
     background: linear-gradient(90deg,
-        #1a7a2e  0%,   #4CAF50 12.5%, #a8f0b8 25%,
-        #4CAF50 37.5%, #1a7a2e 50%,   #4CAF50 62.5%,
-        #a8f0b8 75%,   #4CAF50 87.5%, #1a7a2e 100%
+        #1a7a2e, #4CAF50, #a8f0b8, #4CAF50, #1a7a2e, #4CAF50, #a8f0b8, #4CAF50, #1a7a2e
     );
-    background-size: 400% 100%;
+    background-size: 200% 100%;
     -webkit-background-clip: text;
     background-clip: text;
-    /* Start instantly visible as gradient — no invisible flash */
     -webkit-text-fill-color: transparent;
     color: transparent;
-    /* animation-fill-mode: both ensures the first keyframe applies before paint */
-    -webkit-animation: logoSlide 6s linear infinite;
-    animation: logoSlide 6s linear infinite;
-    animation-fill-mode: both;
-    -webkit-animation-fill-mode: both;
+    -webkit-animation: logoSlide 4s linear infinite;
+    animation: logoSlide 4s linear infinite;
 }
 
-/* Animate from 0→75%: the repeating gradient means 75% looks identical to 0%
-   so the loop is perfectly seamless with zero jump */
 @keyframes logoSlide {
-    0%   { background-position: 0%   0; }
-    100% { background-position: 75%  0; }
+    from { background-position: 100% 0; }
+    to   { background-position:  -100% 0; }
 }
 @-webkit-keyframes logoSlide {
-    0%   { background-position: 0%   0; }
-    100% { background-position: 75%  0; }
+    from { background-position: 100% 0; }
+    to   { background-position: -100% 0; }
 }
 
 /* ── Search bar — inline layout ── */
@@ -628,88 +619,85 @@ function shadeColor(hex, pct) {
     return '#' + [r,g,b].map(function(v) { return ('0'+v.toString(16)).slice(-2); }).join('');
 }
 
-/* ── Search — races 6 proxies, first valid wins ── */
+/* ── Search — DDG Instant Answer API (no proxy needed, real CORS headers) ── */
 var searchCache = {};
 
 function fetchSearch(query) {
     var key = query.toLowerCase().trim();
     if (searchCache[key]) return Promise.resolve(searchCache[key]);
 
-    var ddg = 'https://html.duckduckgo.com/html/?q=' + encodeURIComponent(query);
-    var enc = encodeURIComponent(ddg);
+    /* skip_disambig=0 returns more data, no_redirect=1 follows through */
+    var url = 'https://api.duckduckgo.com/?q=' + encodeURIComponent(query) +
+              '&format=json&no_redirect=1&no_html=1&skip_disambig=0&t=ligmabrowser';
 
-    /* Six different proxy approaches fired simultaneously */
-    var attempts = [
-        /* 1. allorigins JSON wrapper — most reliable */
-        function() {
-            return fetchT('https://api.allorigins.win/get?url=' + enc, 10000)
-                .then(function(r) { if (!r.ok) throw 0; return r.json(); })
-                .then(function(d) {
-                    if (!d || !d.contents || d.contents.indexOf('result__a') < 0) throw 0;
-                    return d.contents;
-                });
-        },
-        /* 2. allorigins raw */
-        function() {
-            return fetchT('https://api.allorigins.win/raw?url=' + enc, 10000)
-                .then(function(r) { if (!r.ok) throw 0; return r.text(); })
-                .then(function(t) { if (t.indexOf('result__a') < 0) throw 0; return t; });
-        },
-        /* 3. corsproxy.io encoded */
-        function() {
-            return fetchT('https://corsproxy.io/?' + enc, 10000)
-                .then(function(r) { if (!r.ok) throw 0; return r.text(); })
-                .then(function(t) { if (t.indexOf('result__a') < 0) throw 0; return t; });
-        },
-        /* 4. corsproxy.io unencoded */
-        function() {
-            return fetchT('https://corsproxy.io/?' + ddg, 10000)
-                .then(function(r) { if (!r.ok) throw 0; return r.text(); })
-                .then(function(t) { if (t.indexOf('result__a') < 0) throw 0; return t; });
-        },
-        /* 5. codetabs */
-        function() {
-            return fetchT('https://api.codetabs.com/v1/proxy?quest=' + enc, 10000)
-                .then(function(r) { if (!r.ok) throw 0; return r.text(); })
-                .then(function(t) { if (t.indexOf('result__a') < 0) throw 0; return t; });
-        },
-        /* 6. htmldriven cors-anywhere public demo */
-        function() {
-            return fetchT('https://cors-anywhere.herokuapp.com/' + ddg, 10000)
-                .then(function(r) { if (!r.ok) throw 0; return r.text(); })
-                .then(function(t) { if (t.indexOf('result__a') < 0) throw 0; return t; });
-        }
-    ];
-
-    return new Promise(function(resolve, reject) {
-        var done = false, fails = 0;
-        attempts.forEach(function(fn) {
-            fn().then(function(html) {
-                if (!done) { done = true; searchCache[key] = html; resolve(html); }
-            }).catch(function() {
-                fails++;
-                if (fails === attempts.length && !done) reject();
-            });
-        });
-    });
+    return fetchT(url, 8000)
+        .then(function(r) { if (!r.ok) throw 0; return r.json(); })
+        .then(function(d) { searchCache[key] = d; return d; });
 }
 
-function parseDDG(html) {
-    var doc   = new DOMParser().parseFromString(html, 'text/html');
-    var links = doc.querySelectorAll('.result__a');
-    var snips = doc.querySelectorAll('.result__snippet');
-    var out   = [];
-    for (var i = 0; i < links.length; i++) {
-        var href = links[i].getAttribute('href') || '';
-        if (href.indexOf('uddg=') >= 0) { try { href = decodeURIComponent(href.split('uddg=')[1]); } catch(e) {} }
-        href = href.split('&rut=')[0];
-        if (href.indexOf('https%3A') === 0 || href.indexOf('http%3A') === 0) { try { href = decodeURIComponent(href); } catch(e) {} }
-        if (href.indexOf('http') !== 0) continue;
-        var host = '';
-        try { host = new URL(href).hostname.replace(/^www\./, ''); } catch(e) {}
-        out.push({ title: links[i].textContent.trim(), href: href, host: host, snippet: snips[i] ? snips[i].textContent.trim() : '' });
+function buildResults(data, query) {
+    var items = [];
+    var seen  = {};
+
+    function add(title, href, host, snippet) {
+        if (!title) return;
+        if (href && seen[href]) return;
+        if (href) seen[href] = true;
+        if (!host && href) {
+            try { host = new URL(href).hostname.replace(/^www\./, ''); } catch(e) {}
+        }
+        items.push({ title: title, href: href || null, host: host || '', snippet: snippet || '' });
     }
-    return out;
+
+    /* 1. Direct answer */
+    if (data.Answer) add(data.Answer, null, '', data.AnswerType || '');
+
+    /* 2. Abstract */
+    if (data.AbstractText && data.AbstractURL)
+        add(data.Heading || query, data.AbstractURL, data.AbstractSource, data.AbstractText);
+
+    /* 3. Definition */
+    if (data.Definition && data.DefinitionURL)
+        add('Definition: ' + query, data.DefinitionURL, data.DefinitionSource, data.Definition);
+
+    /* 4. Infobox entity — often has the official URL */
+    if (data.Infobox && data.Infobox.content) {
+        var content = data.Infobox.content;
+        for (var c = 0; c < content.length; c++) {
+            var field = content[c];
+            if (field.label && field.value && typeof field.value === 'string' && field.value.indexOf('http') === 0) {
+                add(field.label, field.value, '', '');
+            }
+        }
+    }
+
+    /* 5. Results array (often has the official site) */
+    var results = data.Results || [];
+    for (var r = 0; r < results.length; r++) {
+        if (results[r].FirstURL && results[r].Text)
+            add(results[r].Text, results[r].FirstURL, '', '');
+    }
+
+    /* 6. RelatedTopics — flatten including sub-topics */
+    var topics = data.RelatedTopics || [];
+    for (var i = 0; i < topics.length; i++) {
+        var t = topics[i];
+        if (t.FirstURL && t.Text) {
+            var title = t.Text.split(' - ')[0] || t.Text;
+            add(title, t.FirstURL, '', t.Text);
+        }
+        if (t.Topics) {
+            for (var j = 0; j < t.Topics.length; j++) {
+                var s = t.Topics[j];
+                if (s.FirstURL && s.Text) {
+                    var stitle = s.Text.split(' - ')[0] || s.Text;
+                    add(stitle, s.FirstURL, '', s.Text);
+                }
+            }
+        }
+    }
+
+    return items;
 }
 
 function doSearch() {
@@ -719,10 +707,15 @@ function doSearch() {
 
     rDiv.innerHTML = '<div class="loading"><div class="spinner"></div><div>Searching for <strong>' + escHtml(query) + '</strong>...</div></div>';
 
-    fetchSearch(query).then(function(html) {
-        var items = parseDDG(html).slice(0, cfg.maxResults);
+    fetchSearch(query).then(function(data) {
+        var items = buildResults(data, query).slice(0, cfg.maxResults);
         rDiv.innerHTML = '';
-        if (!items.length) { rDiv.innerHTML = '<p style="text-align:center">No results found.</p>'; return; }
+
+        if (!items.length) {
+            rDiv.innerHTML = '<p style="text-align:center;padding:20px;">No results found for <strong>' + escHtml(query) + '</strong>.</p>';
+            return;
+        }
+
         var frag = document.createDocumentFragment();
         items.forEach(function(r) {
             var wrap = document.createElement('div');
@@ -741,8 +734,8 @@ function doSearch() {
                 row.appendChild(img);
             }
 
-            var a = document.createElement('a');
-            a.href = r.href; a.target = cfg.target; a.rel = 'noopener noreferrer';
+            var a = document.createElement(r.href ? 'a' : 'strong');
+            if (r.href) { a.href = r.href; a.target = cfg.target; a.rel = 'noopener noreferrer'; }
             a.textContent = r.title;
             row.appendChild(a);
 
@@ -757,9 +750,11 @@ function doSearch() {
             wrap.appendChild(row); wrap.appendChild(urlEl); wrap.appendChild(p);
             frag.appendChild(wrap);
         });
+
         rDiv.appendChild(frag);
+
     }).catch(function() {
-        rDiv.innerHTML = '<p style="text-align:center">Search failed — all sources unavailable. Please try again.</p>';
+        rDiv.innerHTML = '<p style="text-align:center;padding:20px;">Search unavailable. Please try again.</p>';
     });
 }
 
@@ -769,7 +764,7 @@ if (qEl && qEl.addEventListener) {
     qEl.addEventListener('input', function() {
         clearTimeout(pfTimer);
         var v = this.value.trim();
-        if (v.length > 3) pfTimer = setTimeout(function() { fetchSearch(v).catch(function(){}); }, 400);
+        if (v.length > 3) pfTimer = setTimeout(function() { fetchSearch(v).catch(function(){}); }, 500);
     });
 }
 
