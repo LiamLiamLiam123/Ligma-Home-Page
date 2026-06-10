@@ -631,7 +631,7 @@ function fetchSearch(query) {
     return fetchT(workerUrl, 10000)
         .then(function(r) { if (!r.ok) throw 0; return r.text(); })
         .then(function(html) {
-            if (html.indexOf('result__a') < 0) throw 0;
+            if (html.indexOf('b_algo') < 0 && html.indexOf('result__a') < 0) throw 0;
             searchCache[key] = html;
             return html;
         });
@@ -644,7 +644,8 @@ function buildResults(html, query) {
 
     function addItem(title, href, snippet) {
         if (!title || !href) return;
-        if (href.indexOf('duckduckgo.com') !== -1) return;
+        if (href.indexOf('bing.com') !== -1) return;
+        if (href.indexOf('microsoft.com') !== -1) return;
         if (href.indexOf('http') !== 0) return;
         if (seen[href]) return;
         seen[href] = true;
@@ -653,33 +654,13 @@ function buildResults(html, query) {
         items.push({ title: title, href: href, host: host, snippet: snippet || '' });
     }
 
-    /* html.duckduckgo.com format */
-    var links = doc.querySelectorAll('.result__a');
-    var snips = doc.querySelectorAll('.result__snippet');
-    for (var i = 0; i < links.length; i++) {
-        var href = links[i].getAttribute('href') || '';
-        if (href.indexOf('uddg=') >= 0) {
-            try { href = decodeURIComponent(href.split('uddg=')[1].split('&')[0]); } catch(e) {}
-        }
-        if (href.indexOf('https%3A') === 0 || href.indexOf('http%3A') === 0) {
-            try { href = decodeURIComponent(href); } catch(e) {}
-        }
-        addItem(links[i].textContent.trim(), href, snips[i] ? snips[i].textContent.trim() : '');
-    }
-
-    /* lite.duckduckgo.com format */
-    if (!items.length) {
-        var rows = doc.querySelectorAll('tr');
-        for (var r = 0; r < rows.length; r++) {
-            var a = rows[r].querySelector('a.result-link');
-            var snip = rows[r].querySelector('.result-snippet');
-            if (a) {
-                var lhref = a.getAttribute('href') || '';
-                if (lhref.indexOf('uddg=') >= 0) {
-                    try { lhref = decodeURIComponent(lhref.split('uddg=')[1].split('&')[0]); } catch(e) {}
-                }
-                addItem(a.textContent.trim(), lhref, snip ? snip.textContent.trim() : '');
-            }
+    /* Bing result format: li.b_algo contains h2 > a and p.b_lineclamp2 */
+    var results = doc.querySelectorAll('li.b_algo');
+    for (var i = 0; i < results.length; i++) {
+        var a       = results[i].querySelector('h2 a');
+        var snippet = results[i].querySelector('p, .b_lineclamp2, .b_lineclamp3, .b_lineclamp4');
+        if (a && a.getAttribute('href')) {
+            addItem(a.textContent.trim(), a.getAttribute('href'), snippet ? snippet.textContent.trim() : '');
         }
     }
 
