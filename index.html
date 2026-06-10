@@ -19,6 +19,8 @@
         --spacing: 20px;
         --result-bg: #ffffff;
         --border-radius: 8px;
+        --link-color: #1a0dab;
+        --url-color: #006621;
     }
 
     body {
@@ -35,7 +37,7 @@
     h1 { margin: 0; }
 
     nav { background-color: var(--nav-bg); overflow: hidden; transition: background-color 0.3s; }
-    nav a { float: left; display: block; color: white; text-align: center; padding: 14px 20px; text-decoration: none; font-size: 14px; }
+    nav a { float: left; display: block; color: white; text-align: center; padding: 14px 20px; text-decoration: none; font-size: 14px; transition: background-color 0.2s; }
     nav a:hover { background-color: #ddd; color: black; }
     nav a.active { background-color: var(--accent); }
 
@@ -52,16 +54,21 @@
     .logo-text {
         background: linear-gradient(90deg, #1a7a2e 0%, #4CAF50 20%, #a8f0b8 40%, #4CAF50 60%, #1a7a2e 80%, #4CAF50 100%);
         background-size: 200% 100%;
-        -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+        -webkit-animation: logoSlide 4s linear infinite;
         animation: logoSlide 4s linear infinite;
     }
-    @keyframes logoSlide { from { background-position: 200% 0; } to { background-position: 0% 0; } }
+    @-webkit-keyframes logoSlide { from { background-position: 200% 0; } to { background-position: 0% 0; } }
+    @keyframes logoSlide          { from { background-position: 200% 0; } to { background-position: 0% 0; } }
 
     /* ── Search bar ── */
     .search-container input[type=text] {
         padding: 10px; width: 60%; border: 1px solid #ccc; border-radius: 5px; outline: none;
         font-size: var(--font-size); font-family: var(--font-family);
         background: var(--body-bg); color: var(--body-color); margin-bottom: 12px;
+        display: block; margin-left: auto; margin-right: auto;
     }
     .search-container button {
         padding: 10px 20px; background-color: var(--accent); color: white;
@@ -71,17 +78,18 @@
 
     /* ── Results ── */
     #results { max-width: 800px; margin: 30px auto; padding: 10px; text-align: center; }
-    .result { margin-bottom: 20px; padding: 15px; border-radius: var(--border-radius); box-shadow: 0 2px 6px rgba(0,0,0,0.1); background: var(--result-bg); text-align: left; }
-    .result-title-row { display: flex; align-items: center; gap: 10px; margin-bottom: 4px; }
-    .result-favicon { width: 16px; height: 16px; border-radius: 2px; flex-shrink: 0; }
-    .result a { color: #1a0dab; font-size: 18px; text-decoration: none; }
+    .result { margin-bottom: 20px; padding: 15px; border-radius: var(--border-radius); -webkit-box-shadow: 0 2px 6px rgba(0,0,0,0.1); box-shadow: 0 2px 6px rgba(0,0,0,0.1); background: var(--result-bg); text-align: left; }
+    .result-title-row { display: -webkit-box; display: -ms-flexbox; display: flex; -webkit-box-align: center; -ms-flex-align: center; align-items: center; gap: 10px; margin-bottom: 4px; }
+    .result-favicon { width: 16px; height: 16px; border-radius: 2px; -ms-flex-negative: 0; flex-shrink: 0; }
+    .result a { color: var(--link-color); font-size: 18px; text-decoration: none; }
     .result a:hover { text-decoration: underline; }
-    .result-url { color: #006621; font-size: 13px; margin-bottom: 4px; padding-left: 26px; }
+    .result-url { color: var(--url-color); font-size: 13px; margin-bottom: 4px; padding-left: 26px; }
     .result p { color: var(--body-color); opacity: 0.8; margin: 0; padding-left: 26px; }
 
     /* ── Spinner ── */
     .loading { text-align: center; padding: 30px; color: #555; }
-    .spinner { display: inline-block; width: 32px; height: 32px; border: 4px solid #ccc; border-top-color: var(--accent); border-radius: 50%; animation: spin 0.7s linear infinite; margin-bottom: 8px; }
+    .spinner { display: inline-block; width: 32px; height: 32px; border: 4px solid #ccc; border-top-color: var(--accent); border-radius: 50%; -webkit-animation: spin 0.7s linear infinite; animation: spin 0.7s linear infinite; margin-bottom: 8px; }
+    @-webkit-keyframes spin { to { -webkit-transform: rotate(360deg); } }
     @keyframes spin { to { transform: rotate(360deg); } }
 
     /* ── About ── */
@@ -92,52 +100,32 @@
     #download { text-align: center; }
     #download h2 { margin-bottom: 8px; }
     #download p { margin: 6px 0; }
-    #download .btn { display: inline-block; padding: 10px 20px; background-color: var(--accent); color: white; text-decoration: none; border-radius: 5px; transition: background-color 0.3s; margin-top: 8px; }
+    #download .btn { display: inline-block; padding: 10px 20px; background-color: var(--accent); color: white; text-decoration: none; border-radius: 5px; -webkit-transition: background-color 0.3s; transition: background-color 0.3s; margin-top: 8px; }
     #download .btn:hover { background-color: var(--accent-dark); }
-
-    /* ── Bookmarks ── */
-    #bookmarks h2 { text-align: center; }
-    .bookmark-add { display: flex; gap: 8px; margin-bottom: 20px; flex-wrap: wrap; justify-content: center; }
-    .bookmark-add input { flex: 1; min-width: 160px; padding: 8px; border: 1px solid #ccc; border-radius: 5px; background: var(--body-bg); color: var(--body-color); font-size: 14px; }
-    .bookmark-add button { padding: 8px 16px; background: var(--accent); color: white; border: none; border-radius: 5px; cursor: pointer; }
-    .bookmark-add button:hover { background: var(--accent-dark); }
-    .bookmark-list { max-width: 700px; margin: 0 auto; }
-    .bookmark-item { display: flex; align-items: center; gap: 10px; padding: 10px 14px; border-radius: var(--border-radius); box-shadow: 0 1px 4px rgba(0,0,0,0.1); margin-bottom: 10px; background: var(--result-bg); }
-    .bookmark-item img { width: 16px; height: 16px; }
-    .bookmark-item a { flex: 1; color: #1a0dab; text-decoration: none; font-size: 15px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-    .bookmark-item a:hover { text-decoration: underline; }
-    .bookmark-item .bm-del { background: #e74c3c; color: white; border: none; border-radius: 4px; padding: 4px 10px; cursor: pointer; font-size: 12px; }
-    .no-items { text-align: center; color: #888; padding: 30px; }
-
-    /* ── History ── */
-    #history h2 { text-align: center; }
-    .history-controls { text-align: center; margin-bottom: 16px; }
-    .history-controls button { padding: 7px 16px; background: #e74c3c; color: white; border: none; border-radius: 5px; cursor: pointer; }
-    .history-list { max-width: 700px; margin: 0 auto; }
-    .history-item { display: flex; align-items: center; gap: 10px; padding: 9px 14px; border-radius: var(--border-radius); box-shadow: 0 1px 4px rgba(0,0,0,0.08); margin-bottom: 8px; background: var(--result-bg); }
-    .history-item img { width: 16px; height: 16px; }
-    .history-item .h-query { flex: 1; font-size: 15px; cursor: pointer; color: #1a0dab; }
-    .history-item .h-query:hover { text-decoration: underline; }
-    .history-item .h-time { font-size: 12px; color: #888; white-space: nowrap; }
 
     /* ── Settings ── */
     #settings { max-width: 660px; margin: 0 auto; }
     #settings h2 { text-align: center; color: var(--accent); }
-    .settings-tabs { display: flex; gap: 6px; margin-bottom: 20px; flex-wrap: wrap; }
-    .stab { padding: 8px 18px; border: 2px solid var(--accent); border-radius: 5px; cursor: pointer; background: transparent; color: var(--body-color); font-size: 14px; font-weight: bold; transition: all 0.2s; }
+    .settings-tabs { display: -webkit-box; display: -ms-flexbox; display: flex; gap: 6px; margin-bottom: 20px; -ms-flex-wrap: wrap; flex-wrap: wrap; }
+    .stab { padding: 8px 18px; border: 2px solid var(--accent); border-radius: 5px; cursor: pointer; background: transparent; color: var(--body-color); font-size: 14px; font-weight: bold; -webkit-transition: all 0.2s; transition: all 0.2s; }
     .stab.active { background: var(--accent); color: white; }
     .stab-panel { display: none; }
     .stab-panel.active { display: block; }
     .setting-group { margin-bottom: 18px; }
     .setting-group label { display: block; font-weight: bold; margin-bottom: 6px; color: var(--body-color); }
-    .setting-group input[type=color] { width: 48px; height: 32px; border: none; cursor: pointer; border-radius: 4px; padding: 0; }
-    .setting-group select, .setting-group input[type=range], .setting-group input[type=url], .setting-group input[type=text] {
-        width: 100%; padding: 8px; border-radius: 5px; border: 1px solid #ccc; font-size: 14px; background: var(--body-bg); color: var(--body-color);
+    .setting-group small { font-weight: normal; color: #888; }
+    .setting-group input[type=color] { width: 48px; height: 32px; border: none; cursor: pointer; border-radius: 4px; padding: 0; vertical-align: middle; }
+    .setting-group select,
+    .setting-group input[type=range],
+    .setting-group input[type=url],
+    .setting-group input[type=text] {
+        width: 100%; padding: 8px; border-radius: 5px; border: 1px solid #ccc;
+        font-size: 14px; background: var(--body-bg); color: var(--body-color);
     }
     .setting-group input[type=range] { padding: 4px 0; }
-    .setting-row { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }
+    .setting-row { display: -webkit-box; display: -ms-flexbox; display: flex; -webkit-box-align: center; -ms-flex-align: center; align-items: center; gap: 12px; -ms-flex-wrap: wrap; flex-wrap: wrap; }
     .setting-row span { font-size: 13px; color: var(--body-color); opacity: 0.7; min-width: 40px; }
-    .settings-btn-row { display: flex; gap: 10px; justify-content: center; margin-top: 16px; }
+    .settings-btn-row { display: -webkit-box; display: -ms-flexbox; display: flex; gap: 10px; -webkit-box-pack: center; -ms-flex-pack: center; justify-content: center; margin-top: 16px; }
     .settings-btn-row button { padding: 10px 24px; border: none; border-radius: 5px; cursor: pointer; font-size: 15px; font-weight: bold; }
     #applyBtn { background-color: var(--accent); color: white; }
     #applyBtn:hover { background-color: var(--accent-dark); }
@@ -145,13 +133,9 @@
     #resetBtn:hover { background-color: #bbb; }
 
     /* ── Dark mode ── */
-    body.dark {
-        --body-bg: #1a1a1a; --body-color: #f0f0f0; --nav-bg: #111;
-        --result-bg: #242424;
-    }
-    body.dark .result, body.dark .bookmark-item, body.dark .history-item { box-shadow: 0 2px 6px rgba(0,0,0,0.4); }
+    body.dark { --body-bg: #1a1a1a; --body-color: #f0f0f0; --nav-bg: #111; --result-bg: #242424; }
+    body.dark .result { -webkit-box-shadow: 0 2px 6px rgba(0,0,0,0.4); box-shadow: 0 2px 6px rgba(0,0,0,0.4); }
     body.dark .search-container input[type=text],
-    body.dark .bookmark-add input,
     body.dark .setting-group select,
     body.dark .setting-group input[type=url],
     body.dark .setting-group input[type=text] { border-color: #444; }
@@ -160,16 +144,14 @@
 <body>
 
 <header>
-    <h1>Welcome to Ligma Browser Home Page</h1>
+    <h1 id="header-text">Welcome to Ligma Browser Home Page</h1>
 </header>
 
 <nav id="mainnav">
     <a href="#" onclick="showPage('home'); return false;">Home</a>
-    <a href="#" onclick="showPage('bookmarks'); return false;">⭐ Bookmarks</a>
-    <a href="#" onclick="showPage('history'); return false;">🕐 History</a>
     <a href="#" onclick="showPage('about'); return false;">About</a>
     <a href="#" onclick="showPage('download'); return false;">Download</a>
-    <a href="#" onclick="showPage('settings'); return false;">⚙ Settings</a>
+    <a href="#" onclick="showPage('settings'); return false;">&#9881; Settings</a>
 </nav>
 
 <div class="container">
@@ -182,26 +164,6 @@
             <button onclick="doSearch()">Search</button>
         </div>
         <div id="results"></div>
-    </div>
-
-    <!-- Bookmarks -->
-    <div id="bookmarks" class="page">
-        <h2>⭐ Bookmarks</h2>
-        <div class="bookmark-add">
-            <input type="text" id="bm-title" placeholder="Title">
-            <input type="url" id="bm-url" placeholder="https://example.com">
-            <button onclick="addBookmark()">+ Add</button>
-        </div>
-        <div class="bookmark-list" id="bookmark-list"></div>
-    </div>
-
-    <!-- History -->
-    <div id="history" class="page">
-        <h2>🕐 Search History</h2>
-        <div class="history-controls">
-            <button onclick="clearHistory()">🗑 Clear History</button>
-        </div>
-        <div class="history-list" id="history-list"></div>
     </div>
 
     <!-- About -->
@@ -231,12 +193,13 @@
 
     <!-- Settings -->
     <div id="settings" class="page">
-        <h2>⚙ Settings</h2>
+        <h2>&#9881; Settings</h2>
 
         <div class="settings-tabs">
-            <button class="stab active" onclick="showStab('appearance', this)">🎨 Appearance</button>
-            <button class="stab" onclick="showStab('layout', this)">📐 Layout</button>
-            <button class="stab" onclick="showStab('search', this)">🔍 Search</button>
+            <button class="stab active" onclick="showStab('appearance', this)">Appearance</button>
+            <button class="stab" onclick="showStab('layout', this)">Layout</button>
+            <button class="stab" onclick="showStab('search', this)">Search</button>
+            <button class="stab" onclick="showStab('advanced', this)">Advanced</button>
         </div>
 
         <!-- Appearance -->
@@ -244,12 +207,12 @@
             <div class="setting-group">
                 <label>Theme</label>
                 <select id="s-theme">
-                    <option value="light">☀️ Light</option>
-                    <option value="dark">🌙 Dark</option>
+                    <option value="light">Light</option>
+                    <option value="dark">Dark</option>
                 </select>
             </div>
             <div class="setting-group">
-                <label>Accent Colour</label>
+                <label>Accent Colour <small>(header, buttons, footer)</small></label>
                 <div class="setting-row">
                     <input type="color" id="s-accent" value="#4CAF50">
                     <span id="s-accent-val">#4CAF50</span>
@@ -263,6 +226,20 @@
                 </div>
             </div>
             <div class="setting-group">
+                <label>Result Link Colour</label>
+                <div class="setting-row">
+                    <input type="color" id="s-linkcolor" value="#1a0dab">
+                    <span id="s-linkcolor-val">#1a0dab</span>
+                </div>
+            </div>
+            <div class="setting-group">
+                <label>Result URL Colour</label>
+                <div class="setting-row">
+                    <input type="color" id="s-urlcolor" value="#006621">
+                    <span id="s-urlcolor-val">#006621</span>
+                </div>
+            </div>
+            <div class="setting-group">
                 <label>Font Style</label>
                 <select id="s-font">
                     <option value="Arial, sans-serif">Arial (Default)</option>
@@ -273,27 +250,29 @@
                     <option value="'Times New Roman', serif">Times New Roman</option>
                     <option value="Impact, sans-serif">Impact</option>
                     <option value="'Trebuchet MS', sans-serif">Trebuchet MS</option>
+                    <option value="'Comic Sans MS', cursive">Comic Sans</option>
                 </select>
             </div>
             <div class="setting-group">
                 <label>Font Size — <span id="s-size-val">16</span>px</label>
                 <div class="setting-row">
                     <span>12</span>
-                    <input type="range" id="s-size" min="12" max="24" value="16" oninput="document.getElementById('s-size-val').textContent=this.value">
-                    <span>24</span>
+                    <input type="range" id="s-size" min="12" max="28" value="16" oninput="document.getElementById('s-size-val').textContent=this.value">
+                    <span>28</span>
                 </div>
-            </div>
-            <div class="setting-group">
-                <label>Background Image URL <small>(leave blank for none)</small></label>
-                <input type="url" id="s-bgimg" placeholder="https://example.com/image.jpg">
             </div>
             <div class="setting-group">
                 <label>Result Card Style</label>
                 <select id="s-cardstyle">
                     <option value="8px">Rounded (Default)</option>
-                    <option value="0px">Sharp</option>
+                    <option value="0px">Sharp / Square</option>
                     <option value="16px">Extra Rounded</option>
+                    <option value="999px">Pill</option>
                 </select>
+            </div>
+            <div class="setting-group">
+                <label>Background Image URL <small>(leave blank for none)</small></label>
+                <input type="url" id="s-bgimg" placeholder="https://example.com/image.jpg">
             </div>
         </div>
 
@@ -302,27 +281,39 @@
             <div class="setting-group">
                 <label>Page Width</label>
                 <select id="s-width">
-                    <option value="700px">Narrow (700px)</option>
+                    <option value="600px">Narrow (600px)</option>
+                    <option value="700px">Medium (700px)</option>
                     <option value="900px" selected>Normal (900px)</option>
                     <option value="1100px">Wide (1100px)</option>
+                    <option value="1400px">Extra Wide (1400px)</option>
                     <option value="100%">Full Width</option>
                 </select>
             </div>
             <div class="setting-group">
                 <label>Spacing</label>
                 <select id="s-spacing">
-                    <option value="10px">Compact</option>
+                    <option value="8px">Very Compact</option>
+                    <option value="14px">Compact</option>
                     <option value="20px" selected>Normal</option>
-                    <option value="34px">Spacious</option>
+                    <option value="28px">Spacious</option>
+                    <option value="40px">Very Spacious</option>
                 </select>
             </div>
             <div class="setting-group">
-                <label>Header Text</label>
+                <label>Header Text <small>(leave blank for default)</small></label>
                 <input type="text" id="s-header" placeholder="Welcome to Ligma Browser Home Page">
             </div>
             <div class="setting-group">
-                <label>Footer Text</label>
+                <label>Footer Text <small>(leave blank for default)</small></label>
                 <input type="text" id="s-footer" placeholder="© Liam Stephenson 2024. All rights reserved.">
+            </div>
+            <div class="setting-group">
+                <label>Logo Size — <span id="s-logosize-val">72</span>px</label>
+                <div class="setting-row">
+                    <span>36</span>
+                    <input type="range" id="s-logosize" min="36" max="120" value="72" oninput="document.getElementById('s-logosize-val').textContent=this.value">
+                    <span>120</span>
+                </div>
             </div>
         </div>
 
@@ -332,8 +323,9 @@
                 <label>Results Per Page</label>
                 <select id="s-results">
                     <option value="5">5 results</option>
-                    <option value="10" selected>10 results</option>
-                    <option value="20">20 results (slower)</option>
+                    <option value="10" selected>10 results (default)</option>
+                    <option value="15">15 results</option>
+                    <option value="20">20 results</option>
                 </select>
             </div>
             <div class="setting-group">
@@ -351,10 +343,40 @@
                 </select>
             </div>
             <div class="setting-group">
-                <label>Show Search History</label>
-                <select id="s-savehistory">
-                    <option value="yes">Yes (Default)</option>
-                    <option value="no">No</option>
+                <label>Search Placeholder Text</label>
+                <input type="text" id="s-placeholder" placeholder="Search the web...">
+            </div>
+        </div>
+
+        <!-- Advanced -->
+        <div id="stab-advanced" class="stab-panel">
+            <div class="setting-group">
+                <label>Page Title <small>(browser tab name)</small></label>
+                <input type="text" id="s-title" placeholder="Ligma Browser">
+            </div>
+            <div class="setting-group">
+                <label>Result Shadow</label>
+                <select id="s-shadow">
+                    <option value="0 2px 6px rgba(0,0,0,0.1)">Subtle (Default)</option>
+                    <option value="0 4px 16px rgba(0,0,0,0.18)">Strong</option>
+                    <option value="none">None</option>
+                </select>
+            </div>
+            <div class="setting-group">
+                <label>Snippet Text Opacity — <span id="s-opacity-val">80</span>%</label>
+                <div class="setting-row">
+                    <span>30</span>
+                    <input type="range" id="s-opacity" min="30" max="100" value="80" oninput="document.getElementById('s-opacity-val').textContent=this.value">
+                    <span>100</span>
+                </div>
+            </div>
+            <div class="setting-group">
+                <label>Nav Link Style</label>
+                <select id="s-navstyle">
+                    <option value="14px">Normal (Default)</option>
+                    <option value="12px">Small</option>
+                    <option value="16px">Large</option>
+                    <option value="18px">Extra Large</option>
                 </select>
             </div>
         </div>
@@ -367,58 +389,80 @@
 
 </div>
 
-<footer><p id="footer-text">&copy; Liam Stephenson 2024. All rights reserved.</p></footer>
+<footer><p id="footer-text">&#169; Liam Stephenson 2024. All rights reserved.</p></footer>
 
 <script>
 // ── State ──
-const state = {
-    bookmarks: [],   // { title, url }
-    history:   [],   // { query, time }
-    settings: {
-        target: '_blank',
-        maxResults: 10,
-        showFavicons: true,
-        saveHistory: true,
-    }
+var cfg = {
+    target: '_blank',
+    maxResults: 10,
+    showFavicons: true,
+    snippetOpacity: 0.8,
+    shadow: '0 2px 6px rgba(0,0,0,0.1)'
 };
 
+// ── Cross-browser timeout helper (no AbortSignal.timeout) ──
+function fetchWithTimeout(url, options, ms) {
+    var controller = new AbortController();
+    var timer = setTimeout(function() { controller.abort(); }, ms);
+    var opts = Object.assign({}, options, { signal: controller.signal });
+    return fetch(url, opts).then(function(r) {
+        clearTimeout(timer);
+        return r;
+    }).catch(function(e) {
+        clearTimeout(timer);
+        throw e;
+    });
+}
+
 // ── Navigation ──
-const PAGES = ['home','bookmarks','history','about','download','settings'];
+var PAGES = ['home','about','download','settings'];
 function showPage(page) {
-    PAGES.forEach(id => {
-        const el = document.getElementById(id);
-        el.classList.toggle('active', id === page);
+    PAGES.forEach(function(id) {
+        var el = document.getElementById(id);
+        if (el) el.className = id === page ? 'page active' : 'page';
     });
-    document.querySelectorAll('#mainnav a').forEach(a => {
-        a.classList.toggle('active', a.getAttribute('onclick').includes(`'${page}'`));
-    });
-    if (page === 'bookmarks') renderBookmarks();
-    if (page === 'history')   renderHistory();
+    var links = document.querySelectorAll('#mainnav a');
+    for (var i = 0; i < links.length; i++) {
+        var href = links[i].getAttribute('onclick') || '';
+        links[i].className = href.indexOf("'" + page + "'") !== -1 ? 'active' : '';
+    }
 }
 showPage('home');
 
 // ── Settings sub-tabs ──
 function showStab(name, btn) {
-    document.querySelectorAll('.stab-panel').forEach(p => p.classList.remove('active'));
-    document.querySelectorAll('.stab').forEach(b => b.classList.remove('active'));
-    document.getElementById('stab-' + name).classList.add('active');
-    btn.classList.add('active');
+    var panels = document.querySelectorAll('.stab-panel');
+    for (var i = 0; i < panels.length; i++) panels[i].className = 'stab-panel';
+    var stabs = document.querySelectorAll('.stab');
+    for (var i = 0; i < stabs.length; i++) stabs[i].className = 'stab';
+    var p = document.getElementById('stab-' + name);
+    if (p) p.className = 'stab-panel active';
+    btn.className = 'stab active';
 }
 
 // ── Apply Settings ──
 function applySettings() {
-    const root = document.documentElement;
-    const accent   = document.getElementById('s-accent').value;
-    const navcolor = document.getElementById('s-navcolor').value;
-    const font     = document.getElementById('s-font').value;
-    const size     = document.getElementById('s-size').value + 'px';
-    const bg       = document.getElementById('s-bgimg').value.trim();
-    const width    = document.getElementById('s-width').value;
-    const spacing  = document.getElementById('s-spacing').value;
-    const card     = document.getElementById('s-cardstyle').value;
-    const theme    = document.getElementById('s-theme').value;
-    const header   = document.getElementById('s-header').value.trim();
-    const footer   = document.getElementById('s-footer').value.trim();
+    var root = document.documentElement;
+    var accent   = document.getElementById('s-accent').value;
+    var navcolor = document.getElementById('s-navcolor').value;
+    var linkcolor = document.getElementById('s-linkcolor').value;
+    var urlcolor = document.getElementById('s-urlcolor').value;
+    var font     = document.getElementById('s-font').value;
+    var size     = document.getElementById('s-size').value + 'px';
+    var bg       = document.getElementById('s-bgimg').value.trim();
+    var width    = document.getElementById('s-width').value;
+    var spacing  = document.getElementById('s-spacing').value;
+    var card     = document.getElementById('s-cardstyle').value;
+    var theme    = document.getElementById('s-theme').value;
+    var header   = document.getElementById('s-header').value.trim();
+    var footer   = document.getElementById('s-footer').value.trim();
+    var logosize = document.getElementById('s-logosize').value + 'px';
+    var title    = document.getElementById('s-title').value.trim();
+    var shadow   = document.getElementById('s-shadow').value;
+    var opacity  = document.getElementById('s-opacity').value / 100;
+    var navstyle = document.getElementById('s-navstyle').value;
+    var placeholder = document.getElementById('s-placeholder').value.trim();
 
     root.style.setProperty('--accent', accent);
     root.style.setProperty('--accent-dark', shadeColor(accent, -10));
@@ -428,35 +472,48 @@ function applySettings() {
     root.style.setProperty('--container-width', width);
     root.style.setProperty('--spacing', spacing);
     root.style.setProperty('--border-radius', card);
+    root.style.setProperty('--link-color', linkcolor);
+    root.style.setProperty('--url-color', urlcolor);
 
-    // Theme — set explicit bg/color so settings override body.dark
     if (theme === 'dark') {
-        document.body.classList.add('dark');
+        document.body.className = 'dark';
         root.style.setProperty('--body-bg', '#1a1a1a');
         root.style.setProperty('--body-color', '#f0f0f0');
         root.style.setProperty('--result-bg', '#242424');
     } else {
-        document.body.classList.remove('dark');
+        document.body.className = '';
         root.style.setProperty('--body-bg', '#ffffff');
         root.style.setProperty('--body-color', '#000000');
         root.style.setProperty('--result-bg', '#ffffff');
     }
 
-    document.body.style.backgroundImage = bg ? `url('${bg}')` : '';
-    if (header) document.querySelector('header h1').textContent = header;
-    if (footer) document.getElementById('footer-text').textContent = footer;
+    document.body.style.backgroundImage = bg ? "url('" + bg + "')" : '';
+    document.querySelector('.ligma-logo').style.fontSize = logosize;
 
-    // Search settings
-    state.settings.target      = document.getElementById('s-target').value;
-    state.settings.maxResults  = parseInt(document.getElementById('s-results').value);
-    state.settings.showFavicons = document.getElementById('s-favicons').value === 'yes';
-    state.settings.saveHistory  = document.getElementById('s-savehistory').value === 'yes';
+    if (header) document.getElementById('header-text').textContent = header;
+    if (footer) document.getElementById('footer-text').textContent = footer;
+    if (title)  document.title = title;
+    if (placeholder) document.getElementById('query').placeholder = placeholder;
+
+    // Apply to existing results too
+    var snippets = document.querySelectorAll('.result p');
+    for (var i = 0; i < snippets.length; i++) snippets[i].style.opacity = opacity;
+    var results = document.querySelectorAll('.result');
+    for (var i = 0; i < results.length; i++) results[i].style.boxShadow = shadow;
+    var navLinks = document.querySelectorAll('#mainnav a');
+    for (var i = 0; i < navLinks.length; i++) navLinks[i].style.fontSize = navstyle;
+
+    cfg.target       = document.getElementById('s-target').value;
+    cfg.maxResults   = parseInt(document.getElementById('s-results').value, 10);
+    cfg.showFavicons = document.getElementById('s-favicons').value === 'yes';
+    cfg.snippetOpacity = opacity;
+    cfg.shadow = shadow;
 
     alert('Settings applied!');
 }
 
 function resetSettings() {
-    const root = document.documentElement;
+    var root = document.documentElement;
     root.style.setProperty('--accent', '#4CAF50');
     root.style.setProperty('--accent-dark', '#45a049');
     root.style.setProperty('--nav-bg', '#333333');
@@ -465,226 +522,211 @@ function resetSettings() {
     root.style.setProperty('--container-width', '900px');
     root.style.setProperty('--spacing', '20px');
     root.style.setProperty('--border-radius', '8px');
+    root.style.setProperty('--link-color', '#1a0dab');
+    root.style.setProperty('--url-color', '#006621');
     root.style.setProperty('--body-bg', '#ffffff');
     root.style.setProperty('--body-color', '#000000');
     root.style.setProperty('--result-bg', '#ffffff');
-    document.body.classList.remove('dark');
+    document.body.className = '';
     document.body.style.backgroundImage = '';
-    document.querySelector('header h1').textContent = 'Welcome to Ligma Browser Home Page';
-    document.getElementById('footer-text').textContent = '© Liam Stephenson 2024. All rights reserved.';
+    document.querySelector('.ligma-logo').style.fontSize = '72px';
+    document.getElementById('header-text').textContent = 'Welcome to Ligma Browser Home Page';
+    document.getElementById('footer-text').textContent = '\u00a9 Liam Stephenson 2024. All rights reserved.';
+    document.title = 'Ligma Browser';
+    document.getElementById('query').placeholder = 'Search the web...';
 
-    document.getElementById('s-theme').value    = 'light';
-    document.getElementById('s-accent').value   = '#4CAF50';
+    document.getElementById('s-theme').value     = 'light';
+    document.getElementById('s-accent').value    = '#4CAF50';
     document.getElementById('s-accent-val').textContent = '#4CAF50';
-    document.getElementById('s-navcolor').value = '#333333';
+    document.getElementById('s-navcolor').value  = '#333333';
     document.getElementById('s-navcolor-val').textContent = '#333333';
-    document.getElementById('s-font').value     = 'Arial, sans-serif';
-    document.getElementById('s-size').value     = '16';
+    document.getElementById('s-linkcolor').value = '#1a0dab';
+    document.getElementById('s-linkcolor-val').textContent = '#1a0dab';
+    document.getElementById('s-urlcolor').value  = '#006621';
+    document.getElementById('s-urlcolor-val').textContent = '#006621';
+    document.getElementById('s-font').value      = 'Arial, sans-serif';
+    document.getElementById('s-size').value      = '16';
     document.getElementById('s-size-val').textContent = '16';
-    document.getElementById('s-bgimg').value    = '';
+    document.getElementById('s-bgimg').value     = '';
     document.getElementById('s-cardstyle').value = '8px';
-    document.getElementById('s-width').value    = '900px';
-    document.getElementById('s-spacing').value  = '20px';
-    document.getElementById('s-header').value   = '';
-    document.getElementById('s-footer').value   = '';
-    document.getElementById('s-target').value   = '_blank';
-    document.getElementById('s-results').value  = '10';
-    document.getElementById('s-favicons').value = 'yes';
-    document.getElementById('s-savehistory').value = 'yes';
+    document.getElementById('s-width').value     = '900px';
+    document.getElementById('s-spacing').value   = '20px';
+    document.getElementById('s-header').value    = '';
+    document.getElementById('s-footer').value    = '';
+    document.getElementById('s-logosize').value  = '72';
+    document.getElementById('s-logosize-val').textContent = '72';
+    document.getElementById('s-title').value     = '';
+    document.getElementById('s-shadow').value    = '0 2px 6px rgba(0,0,0,0.1)';
+    document.getElementById('s-opacity').value   = '80';
+    document.getElementById('s-opacity-val').textContent = '80';
+    document.getElementById('s-navstyle').value  = '14px';
+    document.getElementById('s-target').value    = '_blank';
+    document.getElementById('s-results').value   = '10';
+    document.getElementById('s-favicons').value  = 'yes';
+    document.getElementById('s-placeholder').value = '';
 
-    state.settings = { target: '_blank', maxResults: 10, showFavicons: true, saveHistory: true };
+    cfg = { target: '_blank', maxResults: 10, showFavicons: true, snippetOpacity: 0.8, shadow: '0 2px 6px rgba(0,0,0,0.1)' };
 }
 
-document.getElementById('s-accent').addEventListener('input', function() {
-    document.getElementById('s-accent-val').textContent = this.value;
-});
-document.getElementById('s-navcolor').addEventListener('input', function() {
-    document.getElementById('s-navcolor-val').textContent = this.value;
-});
+function liveUpdate(inputId, spanId) {
+    var el = document.getElementById(inputId);
+    if (el) el.addEventListener('input', function() {
+        document.getElementById(spanId).textContent = this.value;
+    });
+}
+liveUpdate('s-accent',   's-accent-val');
+liveUpdate('s-navcolor', 's-navcolor-val');
+liveUpdate('s-linkcolor','s-linkcolor-val');
+liveUpdate('s-urlcolor', 's-urlcolor-val');
 
 function shadeColor(hex, percent) {
-    const num = parseInt(hex.replace('#',''), 16);
-    const r = Math.min(255, Math.max(0, (num >> 16) + percent));
-    const g = Math.min(255, Math.max(0, ((num >> 8) & 0xff) + percent));
-    const b = Math.min(255, Math.max(0, (num & 0xff) + percent));
-    return '#' + [r,g,b].map(x => x.toString(16).padStart(2,'0')).join('');
-}
-
-// ── Bookmarks ──
-function addBookmark() {
-    const title = document.getElementById('bm-title').value.trim();
-    const url   = document.getElementById('bm-url').value.trim();
-    if (!url) return alert('Enter a URL');
-    state.bookmarks.unshift({ title: title || url, url });
-    document.getElementById('bm-title').value = '';
-    document.getElementById('bm-url').value   = '';
-    renderBookmarks();
-}
-function removeBookmark(i) {
-    state.bookmarks.splice(i, 1);
-    renderBookmarks();
-}
-function renderBookmarks() {
-    const list = document.getElementById('bookmark-list');
-    if (!state.bookmarks.length) {
-        list.innerHTML = '<div class="no-items">No bookmarks yet. Add one above!</div>';
-        return;
-    }
-    list.innerHTML = '';
-    state.bookmarks.forEach((bm, i) => {
-        let hostname = ''; try { hostname = new URL(bm.url).hostname; } catch(e) {}
-        const div = document.createElement('div');
-        div.className = 'bookmark-item';
-        div.innerHTML = `
-            <img src="https://www.google.com/s2/favicons?domain=${hostname}&sz=32" onerror="this.style.display='none'" alt="">
-            <a href="${escHtml(bm.url)}" target="${state.settings.target}" rel="noopener noreferrer">${escHtml(bm.title)}</a>
-            <button class="bm-del" onclick="removeBookmark(${i})">✕</button>`;
-        list.appendChild(div);
-    });
-}
-
-// ── History ──
-function addHistory(query) {
-    if (!state.settings.saveHistory) return;
-    state.history.unshift({ query, time: new Date().toLocaleTimeString() });
-    if (state.history.length > 50) state.history.pop();
-}
-function clearHistory() {
-    state.history = [];
-    renderHistory();
-}
-function renderHistory() {
-    const list = document.getElementById('history-list');
-    if (!state.history.length) {
-        list.innerHTML = '<div class="no-items">No search history yet.</div>';
-        return;
-    }
-    list.innerHTML = '';
-    state.history.forEach(h => {
-        const div = document.createElement('div');
-        div.className = 'history-item';
-        div.innerHTML = `
-            <span class="h-query" onclick="reSearch('${escHtml(h.query)}')">${escHtml(h.query)}</span>
-            <span class="h-time">${h.time}</span>`;
-        list.appendChild(div);
-    });
-}
-function reSearch(query) {
-    document.getElementById('query').value = query;
-    showPage('home');
-    doSearch();
+    var num = parseInt(hex.replace('#',''), 16);
+    var r = Math.min(255, Math.max(0, (num >> 16) + percent));
+    var g = Math.min(255, Math.max(0, ((num >> 8) & 0xff) + percent));
+    var b = Math.min(255, Math.max(0, (num & 0xff) + percent));
+    return '#' + [r,g,b].map(function(x) { return x.toString(16).padStart(2,'0'); }).join('');
 }
 
 // ── Search ──
-const searchCache = {};
+var searchCache = {};
 
-async function fetchSearch(query) {
-    const key = query.toLowerCase().trim();
-    if (searchCache[key]) return searchCache[key];
+function fetchSearch(query) {
+    var key = query.toLowerCase().trim();
+    if (searchCache[key]) return Promise.resolve(searchCache[key]);
 
-    const ddgUrl = `https://html.duckduckgo.com/html/?q=${encodeURIComponent(query)}`;
-    const attempts = [
-        () => fetch(`https://proxy.corsfix.com/?${ddgUrl}`, { signal: AbortSignal.timeout(8000) })
-                .then(r => { if (!r.ok) throw 0; return r.text(); })
-                .then(t => { if (!t.includes('result__a')) throw 0; return t; }),
-        () => fetch(`https://api.allorigins.win/get?url=${encodeURIComponent(ddgUrl)}`, { signal: AbortSignal.timeout(8000) })
-                .then(r => { if (!r.ok) throw 0; return r.json(); })
-                .then(d => { if (!d.contents?.includes('result__a')) throw 0; return d.contents; }),
-        () => fetch(`https://corsproxy.io/?${encodeURIComponent(ddgUrl)}`, { signal: AbortSignal.timeout(8000) })
-                .then(r => { if (!r.ok) throw 0; return r.text(); })
-                .then(t => { if (!t.includes('result__a')) throw 0; return t; }),
-        () => fetch(`https://thingproxy.freeboard.io/fetch/${ddgUrl}`, { signal: AbortSignal.timeout(8000) })
-                .then(r => { if (!r.ok) throw 0; return r.text(); })
-                .then(t => { if (!t.includes('result__a')) throw 0; return t; }),
+    var ddgUrl = 'https://html.duckduckgo.com/html/?q=' + encodeURIComponent(query);
+
+    var proxies = [
+        function() {
+            return fetchWithTimeout('https://api.allorigins.win/get?url=' + encodeURIComponent(ddgUrl), {}, 9000)
+                .then(function(r) { if (!r.ok) throw 0; return r.json(); })
+                .then(function(d) { if (!d.contents || d.contents.indexOf('result__a') === -1) throw 0; return d.contents; });
+        },
+        function() {
+            return fetchWithTimeout('https://corsproxy.io/?' + encodeURIComponent(ddgUrl), {}, 9000)
+                .then(function(r) { if (!r.ok) throw 0; return r.text(); })
+                .then(function(t) { if (t.indexOf('result__a') === -1) throw 0; return t; });
+        },
+        function() {
+            return fetchWithTimeout('https://proxy.corsfix.com/?' + ddgUrl, {}, 9000)
+                .then(function(r) { if (!r.ok) throw 0; return r.text(); })
+                .then(function(t) { if (t.indexOf('result__a') === -1) throw 0; return t; });
+        },
+        function() {
+            return fetchWithTimeout('https://thingproxy.freeboard.io/fetch/' + ddgUrl, {}, 9000)
+                .then(function(r) { if (!r.ok) throw 0; return r.text(); })
+                .then(function(t) { if (t.indexOf('result__a') === -1) throw 0; return t; });
+        }
     ];
 
-    return new Promise((resolve, reject) => {
-        let done = false, fails = 0;
-        attempts.forEach(fn => {
-            fn().then(html => {
+    return new Promise(function(resolve, reject) {
+        var done = false, fails = 0;
+        proxies.forEach(function(fn) {
+            fn().then(function(html) {
                 if (!done) { done = true; searchCache[key] = html; resolve(html); }
-            }).catch(() => { fails++; if (fails === attempts.length && !done) reject(); });
+            }).catch(function() {
+                fails++;
+                if (fails === proxies.length && !done) reject();
+            });
         });
     });
 }
 
 function parseDDG(html) {
-    const doc = new DOMParser().parseFromString(html, 'text/html');
-    const links = [...doc.querySelectorAll('.result__a')];
-    const snippets = [...doc.querySelectorAll('.result__snippet')];
-    return links.map((link, i) => {
-        let href = link.getAttribute('href') || '';
-        if (href.includes('uddg=')) { try { href = decodeURIComponent(href.split('uddg=')[1]); } catch(e) {} }
+    var doc = new DOMParser().parseFromString(html, 'text/html');
+    var links    = doc.querySelectorAll('.result__a');
+    var snippets = doc.querySelectorAll('.result__snippet');
+    var results  = [];
+    for (var i = 0; i < links.length; i++) {
+        var href = links[i].getAttribute('href') || '';
+        if (href.indexOf('uddg=') !== -1) { try { href = decodeURIComponent(href.split('uddg=')[1]); } catch(e) {} }
         href = href.split('&rut=')[0];
-        if (href.startsWith('https%3A') || href.startsWith('http%3A')) { try { href = decodeURIComponent(href); } catch(e) {} }
-        let hostname = ''; try { hostname = new URL(href).hostname.replace(/^www\./, ''); } catch(e) {}
-        return { title: link.textContent.trim(), href, hostname, snippet: snippets[i]?.textContent.trim() || '' };
-    }).filter(r => r.href.startsWith('http'));
-}
-
-async function doSearch() {
-    const query = document.getElementById('query').value.trim();
-    const resultsDiv = document.getElementById('results');
-    if (!query) return alert("Enter a search term!");
-
-    addHistory(query);
-
-    resultsDiv.innerHTML = `
-        <div class="loading">
-            <div class="spinner"></div>
-            <div>Searching for "<strong>${escHtml(query)}</strong>"...</div>
-        </div>`;
-
-    let html;
-    try { html = await fetchSearch(query); }
-    catch(e) {
-        resultsDiv.innerHTML = `<p style="text-align:center">Search failed — all sources unavailable. Try again later.</p>`;
-        return;
+        if (href.indexOf('https%3A') === 0 || href.indexOf('http%3A') === 0) { try { href = decodeURIComponent(href); } catch(e) {} }
+        if (href.indexOf('http') !== 0) continue;
+        var hostname = '';
+        try { hostname = new URL(href).hostname.replace(/^www\./, ''); } catch(e) {}
+        results.push({
+            title:   links[i].textContent.trim(),
+            href:    href,
+            hostname: hostname,
+            snippet: snippets[i] ? snippets[i].textContent.trim() : ''
+        });
     }
-
-    const items = parseDDG(html).slice(0, state.settings.maxResults);
-    resultsDiv.innerHTML = '';
-    if (!items.length) { resultsDiv.innerHTML = `<p style="text-align:center">No results found.</p>`; return; }
-
-    const frag = document.createDocumentFragment();
-    items.forEach(r => {
-        const div = document.createElement('div');
-        div.className = 'result';
-
-        const titleRow = document.createElement('div');
-        titleRow.className = 'result-title-row';
-
-        if (state.settings.showFavicons && r.hostname) {
-            const img = document.createElement('img');
-            img.className = 'result-favicon';
-            img.src = `https://www.google.com/s2/favicons?domain=${r.hostname}&sz=32`;
-            img.alt = ''; img.onerror = () => { img.style.display='none'; };
-            titleRow.appendChild(img);
-        }
-
-        const a = document.createElement('a');
-        a.href = r.href; a.target = state.settings.target; a.rel = 'noopener noreferrer';
-        a.textContent = r.title;
-        titleRow.appendChild(a);
-
-        const urlEl = document.createElement('div');
-        urlEl.className = 'result-url'; urlEl.textContent = r.hostname;
-
-        const p = document.createElement('p');
-        p.textContent = r.snippet;
-
-        div.appendChild(titleRow); div.appendChild(urlEl); div.appendChild(p);
-        frag.appendChild(div);
-    });
-    resultsDiv.appendChild(frag);
+    return results;
 }
 
-let prefetchTimer = null;
-document.getElementById('query').addEventListener('input', function() {
-    clearTimeout(prefetchTimer);
-    const q = this.value.trim();
-    if (q.length > 3) prefetchTimer = setTimeout(() => fetchSearch(q).catch(() => {}), 400);
-});
+function doSearch() {
+    var query = document.getElementById('query').value.trim();
+    var resultsDiv = document.getElementById('results');
+    if (!query) { alert('Enter a search term!'); return; }
+
+    resultsDiv.innerHTML =
+        '<div class="loading">' +
+        '<div class="spinner"></div>' +
+        '<div>Searching for <strong>' + escHtml(query) + '</strong>...</div>' +
+        '</div>';
+
+    fetchSearch(query).then(function(html) {
+        var items = parseDDG(html).slice(0, cfg.maxResults);
+        resultsDiv.innerHTML = '';
+        if (!items.length) {
+            resultsDiv.innerHTML = '<p style="text-align:center">No results found.</p>';
+            return;
+        }
+        var frag = document.createDocumentFragment();
+        items.forEach(function(r) {
+            var div = document.createElement('div');
+            div.className = 'result';
+            div.style.boxShadow = cfg.shadow;
+
+            var titleRow = document.createElement('div');
+            titleRow.className = 'result-title-row';
+
+            if (cfg.showFavicons && r.hostname) {
+                var img = document.createElement('img');
+                img.className = 'result-favicon';
+                img.src = 'https://www.google.com/s2/favicons?domain=' + r.hostname + '&sz=32';
+                img.alt = '';
+                img.onerror = function() { this.style.display = 'none'; };
+                titleRow.appendChild(img);
+            }
+
+            var a = document.createElement('a');
+            a.href = r.href;
+            a.target = cfg.target;
+            a.rel = 'noopener noreferrer';
+            a.textContent = r.title;
+            titleRow.appendChild(a);
+
+            var urlEl = document.createElement('div');
+            urlEl.className = 'result-url';
+            urlEl.textContent = r.hostname;
+
+            var p = document.createElement('p');
+            p.textContent = r.snippet;
+            p.style.opacity = cfg.snippetOpacity;
+
+            div.appendChild(titleRow);
+            div.appendChild(urlEl);
+            div.appendChild(p);
+            frag.appendChild(div);
+        });
+        resultsDiv.appendChild(frag);
+    }).catch(function() {
+        resultsDiv.innerHTML = '<p style="text-align:center">Search failed &mdash; all sources unavailable. Try again later.</p>';
+    });
+}
+
+// Prefetch while typing — cross-browser safe debounce
+var prefetchTimer = null;
+var queryEl = document.getElementById('query');
+if (queryEl.addEventListener) {
+    queryEl.addEventListener('input', function() {
+        clearTimeout(prefetchTimer);
+        var q = this.value.trim();
+        if (q.length > 3) prefetchTimer = setTimeout(function() { fetchSearch(q); }, 400);
+    });
+}
 
 function escHtml(s) {
     return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
