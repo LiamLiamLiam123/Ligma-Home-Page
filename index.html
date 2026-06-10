@@ -626,27 +626,87 @@ function fetchSearch(query) {
     var key = query.toLowerCase().trim();
     if (searchCache[key]) return Promise.resolve(searchCache[key]);
 
-    /* skip_disambig=0 returns more data, no_redirect=1 follows through */
-    var url = 'https://api.duckduckgo.com/?q=' + encodeURIComponent(query) +
-              '&format=json&no_redirect=1&no_html=1&skip_disambig=0&t=ligmabrowser';
+    var workerUrl = 'https://duckduckligma.vj4ytdg6sw.workers.dev/?q=' + encodeURIComponent(query);
 
-    return fetchT(url, 8000)
-        .then(function(r) { if (!r.ok) throw 0; return r.json(); })
-        .then(function(d) { searchCache[key] = d; return d; });
+    return fetchT(workerUrl, 10000)
+        .then(function(r) { if (!r.ok) throw 0; return r.text(); })
+        .then(function(html) {
+            if (html.indexOf('result__a') < 0) throw 0;
+            searchCache[key] = html;
+            return html;
+        });
+}
+
+function buildResults(html, query) {
+    var doc   = new DOMParser().parseFromString(html, 'text/html');
+    var items = [];
+    var seen  = {};
+
+    function addItem(title, href, snippet) {
+        if (!title || !href) return;
+        if (href.indexOf('duckduckgo.com') !== -1) return;
+        if (href.indexOf('http') !== 0) return;
+        if (seen[href]) return;
+        seen[href] = true;
+        var host = '';
+        try { host = new URL(href).hostname.replace(/^www\./, ''); } catch(e) {}
+        items.push({ title: title, href: href, host: host, snippet: snippet || '' });
+    }
+
+    /* html.duckduckgo.com format */
+    var links = doc.querySelectorAll('.result__a');
+    var snips = doc.querySelectorAll('.result__snippet');
+    for (var i = 0; i < links.length; i++) {
+        var href = links[i].getAttribute('href') || '';
+        if (href.indexOf('uddg=') >= 0) {
+            try { href = decodeURIComponent(href.split('uddg=')[1].split('&')[0]); } catch(e) {}
+        }
+        if (href.indexOf('https%3A') === 0 || href.indexOf('http%3A') === 0) {
+            try { href = decodeURIComponent(href); } catch(e) {}
+        }
+        addItem(links[i].textContent.trim(), href, snips[i] ? snips[i].textContent.trim() : '');
+    }
+
+    /* lite.duckduckgo.com format */
+    if (!items.length) {
+        var rows = doc.querySelectorAll('tr');
+        for (var r = 0; r < rows.length; r++) {
+            var a = rows[r].querySelector('a.result-link');
+            var snip = rows[r].querySelector('.result-snippet');
+            if (a) {
+                var lhref = a.getAttribute('href') || '';
+                if (lhref.indexOf('uddg=') >= 0) {
+                    try { lhref = decodeURIComponent(lhref.split('uddg=')[1].split('&')[0]); } catch(e) {}
+                }
+                addItem(a.textContent.trim(), lhref, snip ? snip.textContent.trim() : '');
+            }
+        }
+    }
+
+    return items;
 }
 
 function buildResults(data, query) {
     var items = [];
     var seen  = {};
 
+    /* Discard ANY duckduckgo.com URL unconditionally */
+    function unwrap(href) {
+        if (!href) return null;
+        if (href.indexOf('duckduckgo.com') !== -1) return null;
+        return href;
+    }
+
     function add(title, href, host, snippet) {
+        href = unwrap(href);
         if (!title) return;
-        if (href && seen[href]) return;
-        if (href) seen[href] = true;
+        if (!href) return; /* skip DDG search redirects */
+        if (seen[href]) return;
+        seen[href] = true;
         if (!host && href) {
             try { host = new URL(href).hostname.replace(/^www\./, ''); } catch(e) {}
         }
-        items.push({ title: title, href: href || null, host: host || '', snippet: snippet || '' });
+        items.push({ title: title, href: href, host: host || '', snippet: snippet || '' });
     }
 
     /* 1. Direct answer */
@@ -707,8 +767,8 @@ function doSearch() {
 
     rDiv.innerHTML = '<div class="loading"><div class="spinner"></div><div>Searching for <strong>' + escHtml(query) + '</strong>...</div></div>';
 
-    fetchSearch(query).then(function(data) {
-        var items = buildResults(data, query).slice(0, cfg.maxResults);
+    fetchSearch(query).then(function(html) {
+        var items = buildResults(html, query).slice(0, cfg.maxResults);
         rDiv.innerHTML = '';
 
         if (!items.length) {
