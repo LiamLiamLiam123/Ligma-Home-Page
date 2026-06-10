@@ -5,233 +5,177 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Ligma Browser</title>
 <style>
-    * { box-sizing: border-box; }
+* { box-sizing: border-box; }
 
-    :root {
-        --accent:           #4CAF50;
-        --accent-dark:      #45a049;
-        --nav-bg:           #333333;
-        --body-bg:          #ffffff;
-        --body-color:       #000000;
-        --result-bg:        #ffffff;
-        --font-family:      Arial, sans-serif;
-        --font-size:        16px;
-        --container-width:  900px;
-        --spacing:          20px;
-        --border-radius:    8px;
-        --link-color:       #1a0dab;
-        --url-color:        #006621;
-    }
+:root {
+    --accent:          #4CAF50;
+    --accent-dark:     #45a049;
+    --nav-bg:          #333333;
+    --body-bg:         #ffffff;
+    --body-color:      #000000;
+    --result-bg:       #ffffff;
+    --font-family:     Arial, sans-serif;
+    --font-size:       16px;
+    --container-width: 900px;
+    --spacing:         20px;
+    --border-radius:   8px;
+    --link-color:      #1a0dab;
+    --url-color:       #006621;
+}
 
-    body {
-        font-family: var(--font-family);
-        font-size:   var(--font-size);
-        margin: 0; padding: 0;
-        background-color: var(--body-bg);
-        background-size: cover; background-position: center; background-attachment: fixed;
-        color: var(--body-color);
-    }
+body {
+    font-family: var(--font-family);
+    font-size: var(--font-size);
+    margin: 0; padding: 0;
+    background-color: var(--body-bg);
+    background-size: cover; background-position: center; background-attachment: fixed;
+    color: var(--body-color);
+}
 
-    header {
-        background-color: var(--accent);
-        color: white; padding: var(--spacing);
-        text-align: center;
-    }
-    h1 { margin: 0; }
+header { background-color: var(--accent); color: white; padding: var(--spacing); text-align: center; }
+h1 { margin: 0; }
+nav { background-color: var(--nav-bg); overflow: hidden; }
+nav a { float: left; display: block; color: white; text-align: center; padding: 14px 20px; text-decoration: none; font-size: 14px; }
+nav a:hover { background-color: #ddd; color: black; }
+nav a.active { background-color: var(--accent); }
+.container { margin: 0 auto; padding: var(--spacing); max-width: var(--container-width); padding-bottom: 70px; }
+footer { background-color: var(--accent); color: white; padding: 10px 0; text-align: center; position: fixed; left: 0; bottom: 0; width: 100%; }
 
-    nav { background-color: var(--nav-bg); overflow: hidden; }
-    nav a {
-        float: left; display: block; color: white;
-        text-align: center; padding: 14px 20px;
-        text-decoration: none; font-size: 14px;
-    }
-    nav a:hover { background-color: #ddd; color: black; }
-    nav a.active { background-color: var(--accent); }
+/* ── Pages ── */
+.page { display: none; }
+.page.active { display: block; }
 
-    .container {
-        margin: 0 auto;
-        padding: var(--spacing);
-        max-width: var(--container-width);
-        padding-bottom: 70px;
-    }
+/* ── Logo ──
+   KEY FIX: no pseudo-element, no position:absolute, no padding hacks.
+   Just direct background-clip on the span itself.
+   The gradient is 400% wide so the pattern tiles seamlessly — start = end. */
+.search-container { text-align: center; padding-top: 80px; }
+.ligma-logo { font-size: 72px; font-weight: bold; font-family: Arial, sans-serif; letter-spacing: -2px; margin-bottom: 40px; line-height: 1.2; }
 
-    footer {
-        background-color: var(--accent); color: white;
-        padding: 10px 0; text-align: center;
-        position: fixed; left: 0; bottom: 0; width: 100%;
-    }
+.logo-text {
+    display: inline-block;
+    /* Seamless: gradient is 4 identical segments so 0% and 100% are the same colour */
+    background: linear-gradient(90deg,
+        #1a7a2e  0%,   #4CAF50 12.5%, #a8f0b8 25%,
+        #4CAF50 37.5%, #1a7a2e 50%,   #4CAF50 62.5%,
+        #a8f0b8 75%,   #4CAF50 87.5%, #1a7a2e 100%
+    );
+    background-size: 400% 100%;
+    -webkit-background-clip: text;
+    background-clip: text;
+    /* Start instantly visible as gradient — no invisible flash */
+    -webkit-text-fill-color: transparent;
+    color: transparent;
+    /* animation-fill-mode: both ensures the first keyframe applies before paint */
+    -webkit-animation: logoSlide 6s linear infinite;
+    animation: logoSlide 6s linear infinite;
+    animation-fill-mode: both;
+    -webkit-animation-fill-mode: both;
+}
 
-    /* ── Pages ── */
-    .page { display: none; }
-    .page.active { display: block; }
+/* Animate from 0→75%: the repeating gradient means 75% looks identical to 0%
+   so the loop is perfectly seamless with zero jump */
+@keyframes logoSlide {
+    0%   { background-position: 0%   0; }
+    100% { background-position: 75%  0; }
+}
+@-webkit-keyframes logoSlide {
+    0%   { background-position: 0%   0; }
+    100% { background-position: 75%  0; }
+}
 
-    /* ── Logo ── */
-    .search-container { text-align: center; padding-top: 80px; }
-    .ligma-logo {
-        font-size: 72px; font-weight: bold;
-        font-family: Arial, sans-serif;
-        letter-spacing: -2px; margin-bottom: 40px; line-height: 1;
-    }
-    .logo-text {
-        position: relative;
-        display: inline-block;
-        color: #1a7a2e;
-        /* extra padding so descenders (g, y, p) are fully covered */
-        padding-bottom: 0.2em;
-        overflow: visible;
-    }
-    .logo-text::after {
-        content: 'Ligma Browser';
-        position: absolute;
-        left: 0; top: 0;
-        /* match exact size including descender padding */
-        width: 100%;
-        height: 100%;
-        padding-bottom: 0.2em;
-        background: linear-gradient(90deg,
-            #1a7a2e  0%,
-            #4CAF50 20%,
-            #a8f0b8 40%,
-            #4CAF50 60%,
-            #1a7a2e 80%,
-            #4CAF50 100%
-        );
-        background-size: 200% 100%;
-        -webkit-background-clip: text;
-        background-clip: text;
-        color: transparent;
-        -webkit-text-fill-color: transparent;
-        -webkit-animation: logoSlide 4s linear infinite;
-        animation:         logoSlide 4s linear infinite;
-        /* ensure pseudo sits exactly over the text */
-        line-height: inherit;
-        font-size: inherit;
-        font-weight: inherit;
-        font-family: inherit;
-        letter-spacing: inherit;
-        white-space: nowrap;
-    }
-    @-webkit-keyframes logoSlide {
-        0%   { background-position: 200% 0; }
-        100% { background-position:   0% 0; }
-    }
-    @keyframes logoSlide {
-        0%   { background-position: 200% 0; }
-        100% { background-position:   0% 0; }
-    }
+/* ── Search bar — inline layout ── */
+.search-row {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    width: 60%;
+    max-width: 560px;
+}
+.search-row input[type=text] {
+    flex: 1;
+    padding: 10px 14px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    outline: none;
+    font-size: var(--font-size);
+    font-family: var(--font-family);
+    background: var(--body-bg);
+    color: var(--body-color);
+}
+.search-row button {
+    padding: 10px 20px;
+    background-color: var(--accent);
+    color: white;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: var(--font-size);
+    white-space: nowrap;
+    flex-shrink: 0;
+}
+.search-row button:hover { background-color: var(--accent-dark); }
 
-    /* ── Search bar ── */
-    .search-container input[type=text] {
-        padding: 10px; width: 60%; max-width: 560px;
-        border: 1px solid #ccc; border-radius: 5px; outline: none;
-        font-size: var(--font-size); font-family: var(--font-family);
-        background: var(--body-bg); color: var(--body-color);
-        display: block; margin: 0 auto 12px;
-    }
-    .search-container button {
-        padding: 10px 20px; background-color: var(--accent); color: white;
-        border: none; border-radius: 5px; cursor: pointer;
-        font-size: var(--font-size);
-    }
-    .search-container button:hover { background-color: var(--accent-dark); }
+/* ── Results ── */
+#results { max-width: 800px; margin: 30px auto; padding: 10px; text-align: center; }
+.result { margin-bottom: 20px; padding: 15px; border-radius: var(--border-radius); box-shadow: 0 2px 6px rgba(0,0,0,0.1); background: var(--result-bg); text-align: left; }
+.result-title-row { display: flex; align-items: center; gap: 10px; margin-bottom: 4px; }
+.result-favicon { width: 16px; height: 16px; border-radius: 2px; flex-shrink: 0; }
+.result a { color: var(--link-color); font-size: 18px; text-decoration: none; }
+.result a:hover { text-decoration: underline; }
+.result-url { color: var(--url-color); font-size: 13px; margin-bottom: 4px; padding-left: 26px; }
+.result p { color: var(--body-color); opacity: 0.8; margin: 0; padding-left: 26px; font-size: 14px; line-height: 1.5; }
 
-    /* ── Results ── */
-    #results { max-width: 800px; margin: 30px auto; padding: 10px; text-align: center; }
-    .result {
-        margin-bottom: 20px; padding: 15px;
-        border-radius: var(--border-radius);
-        box-shadow: 0 2px 6px rgba(0,0,0,0.1);
-        background: var(--result-bg); text-align: left;
-    }
-    .result-title-row { display: flex; align-items: center; gap: 10px; margin-bottom: 4px; }
-    .result-favicon { width: 16px; height: 16px; border-radius: 2px; flex-shrink: 0; }
-    .result a { color: var(--link-color); font-size: 18px; text-decoration: none; }
-    .result a:hover { text-decoration: underline; }
-    .result-url { color: var(--url-color); font-size: 13px; margin-bottom: 4px; padding-left: 26px; }
-    .result p { color: var(--body-color); opacity: 0.8; margin: 0; padding-left: 26px; font-size: 14px; line-height: 1.5; }
+/* ── Spinner ── */
+.loading { text-align: center; padding: 30px; }
+.spinner { display: block; width: 36px; height: 36px; border: 4px solid #ccc; border-top-color: var(--accent); border-radius: 50%; margin: 0 auto 12px; animation: spin 0.7s linear infinite; -webkit-animation: spin 0.7s linear infinite; }
+@keyframes spin { to { transform: rotate(360deg); } }
+@-webkit-keyframes spin { to { -webkit-transform: rotate(360deg); } }
 
-    /* ── Spinner ── */
-    .loading { text-align: center; padding: 30px; }
-    .spinner {
-        display: block; width: 36px; height: 36px;
-        border: 4px solid #ccc; border-top-color: var(--accent);
-        border-radius: 50%; margin: 0 auto 12px;
-        -webkit-animation: spin 0.7s linear infinite;
-        animation:         spin 0.7s linear infinite;
-    }
-    @-webkit-keyframes spin { to { -webkit-transform: rotate(360deg); transform: rotate(360deg); } }
-    @keyframes spin          { to { transform: rotate(360deg); } }
+/* ── About ── */
+#about { text-align: center; }
+#about ul { display: inline-block; text-align: left; }
+#about li { margin-bottom: 6px; }
 
-    /* ── About ── */
-    #about { text-align: center; }
-    #about ul { display: inline-block; text-align: left; }
-    #about li { margin-bottom: 6px; }
+/* ── Download ── */
+#download { text-align: center; }
+#download p { margin: 6px 0; }
+.btn { display: inline-block; padding: 10px 20px; background-color: var(--accent); color: white; text-decoration: none; border-radius: 5px; margin-top: 8px; }
+.btn:hover { background-color: var(--accent-dark); }
 
-    /* ── Download ── */
-    #download { text-align: center; }
-    #download p { margin: 6px 0; }
-    .btn {
-        display: inline-block; padding: 10px 20px;
-        background-color: var(--accent); color: white;
-        text-decoration: none; border-radius: 5px; margin-top: 8px;
-    }
-    .btn:hover { background-color: var(--accent-dark); }
+/* ── Settings ── */
+#settings { max-width: 660px; margin: 0 auto; }
+#settings > h2 { text-align: center; color: var(--accent); }
+.settings-tabs { display: flex; gap: 6px; margin-bottom: 20px; flex-wrap: wrap; }
+.stab { padding: 8px 18px; border: 2px solid var(--accent); border-radius: 5px; cursor: pointer; background: transparent; color: var(--body-color); font-size: 14px; font-weight: bold; }
+.stab.active { background: var(--accent); color: white; }
+.stab-panel { display: none; }
+.stab-panel.active { display: block; }
+.setting-group { margin-bottom: 18px; }
+.setting-group label { display: block; font-weight: bold; margin-bottom: 6px; }
+.setting-group small { font-weight: normal; color: #888; font-size: 12px; }
+.setting-group input[type=color] { width: 48px; height: 32px; border: none; cursor: pointer; border-radius: 4px; padding: 0; vertical-align: middle; }
+.setting-group select,
+.setting-group input[type=range],
+.setting-group input[type=url],
+.setting-group input[type=text] { width: 100%; padding: 8px; border-radius: 5px; border: 1px solid #ccc; font-size: 14px; background: var(--body-bg); color: var(--body-color); }
+.setting-group input[type=range] { padding: 4px 0; cursor: pointer; }
+.setting-row { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }
+.setting-row .sval { font-size: 13px; opacity: 0.7; min-width: 50px; }
+.settings-btn-row { display: flex; gap: 10px; justify-content: center; margin-top: 20px; }
+.settings-btn-row button { padding: 10px 28px; border: none; border-radius: 5px; cursor: pointer; font-size: 15px; font-weight: bold; }
+#applyBtn { background-color: var(--accent); color: white; }
+#applyBtn:hover { background-color: var(--accent-dark); }
+#resetBtn { background-color: #ccc; color: #333; }
+#resetBtn:hover { background-color: #bbb; }
 
-    /* ── Settings ── */
-    #settings { max-width: 660px; margin: 0 auto; }
-    #settings > h2 { text-align: center; color: var(--accent); }
-    .settings-tabs { display: flex; gap: 6px; margin-bottom: 20px; flex-wrap: wrap; }
-    .stab {
-        padding: 8px 18px; border: 2px solid var(--accent);
-        border-radius: 5px; cursor: pointer;
-        background: transparent; color: var(--body-color);
-        font-size: 14px; font-weight: bold;
-    }
-    .stab.active { background: var(--accent); color: white; }
-    .stab-panel { display: none; }
-    .stab-panel.active { display: block; }
-    .setting-group { margin-bottom: 18px; }
-    .setting-group label { display: block; font-weight: bold; margin-bottom: 6px; }
-    .setting-group small { font-weight: normal; color: #888; font-size: 12px; }
-    .setting-group input[type=color] {
-        width: 48px; height: 32px; border: none;
-        cursor: pointer; border-radius: 4px; padding: 0; vertical-align: middle;
-    }
-    .setting-group select,
-    .setting-group input[type=range],
-    .setting-group input[type=url],
-    .setting-group input[type=text] {
-        width: 100%; padding: 8px; border-radius: 5px;
-        border: 1px solid #ccc; font-size: 14px;
-        background: var(--body-bg); color: var(--body-color);
-    }
-    .setting-group input[type=range] { padding: 4px 0; cursor: pointer; }
-    .setting-row { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }
-    .setting-row .sval { font-size: 13px; opacity: 0.7; min-width: 50px; }
-    .settings-btn-row {
-        display: flex; gap: 10px; justify-content: center; margin-top: 20px;
-    }
-    .settings-btn-row button {
-        padding: 10px 28px; border: none; border-radius: 5px;
-        cursor: pointer; font-size: 15px; font-weight: bold;
-    }
-    #applyBtn  { background-color: var(--accent); color: white; }
-    #applyBtn:hover { background-color: var(--accent-dark); }
-    #resetBtn  { background-color: #ccc; color: #333; }
-    #resetBtn:hover { background-color: #bbb; }
-
-    /* ── Dark mode ── */
-    body.dark {
-        --body-bg:    #1a1a1a;
-        --body-color: #f0f0f0;
-        --nav-bg:     #111111;
-        --result-bg:  #242424;
-    }
-    body.dark .search-container input[type=text],
-    body.dark .setting-group select,
-    body.dark .setting-group input[type=url],
-    body.dark .setting-group input[type=text] { border-color: #555; }
-    body.dark .result { box-shadow: 0 2px 8px rgba(0,0,0,0.5); }
+/* ── Dark mode ── */
+body.dark { --body-bg: #1a1a1a; --body-color: #f0f0f0; --nav-bg: #111111; --result-bg: #242424; }
+body.dark .result { box-shadow: 0 2px 8px rgba(0,0,0,0.5); }
+body.dark .search-row input[type=text],
+body.dark .setting-group select,
+body.dark .setting-group input[type=url],
+body.dark .setting-group input[type=text] { border-color: #555; }
 </style>
 </head>
 <body>
@@ -249,20 +193,20 @@
 
 <div class="container">
 
-    <!-- ── Home ── -->
+    <!-- Home -->
     <div id="home" class="page">
         <div class="search-container">
-            <div class="ligma-logo">
-                <span class="logo-text">Ligma Browser</span>
+            <div class="ligma-logo"><span class="logo-text">Ligma Browser</span></div>
+            <div class="search-row">
+                <input type="text" id="query" placeholder="Search the web..."
+                       onkeypress="if(event.key==='Enter'){doSearch()}">
+                <button onclick="doSearch()">Search</button>
             </div>
-            <input type="text" id="query" placeholder="Search the web..."
-                   onkeypress="if(event.key==='Enter'){doSearch()}">
-            <button onclick="doSearch()">Search</button>
         </div>
         <div id="results"></div>
     </div>
 
-    <!-- ── About ── -->
+    <!-- About -->
     <div id="about" class="page">
         <h2>About Ligma Browser</h2>
         <p>Ligma Browser is a fast, secure, and customizable web browser designed to enhance your browsing experience.</p>
@@ -280,7 +224,7 @@
         </div>
     </div>
 
-    <!-- ── Download ── -->
+    <!-- Download -->
     <div id="download" class="page">
         <h2>Download Ligma Browser</h2>
         <p>Check the About section for requirements before downloading.</p>
@@ -289,10 +233,9 @@
         <a class="btn" href="Ligma Browser.py" download>Download Ligma Browser.py</a>
     </div>
 
-    <!-- ── Settings ── -->
+    <!-- Settings -->
     <div id="settings" class="page">
         <h2>&#9881; Settings</h2>
-
         <div class="settings-tabs">
             <button class="stab active" onclick="showStab('appearance',this)">Appearance</button>
             <button class="stab"        onclick="showStab('layout',this)">Layout</button>
@@ -304,13 +247,10 @@
         <div id="stab-appearance" class="stab-panel active">
             <div class="setting-group">
                 <label>Theme</label>
-                <select id="s-theme">
-                    <option value="light">Light</option>
-                    <option value="dark">Dark</option>
-                </select>
+                <select id="s-theme"><option value="light">Light</option><option value="dark">Dark</option></select>
             </div>
             <div class="setting-group">
-                <label>Accent Colour <small>(header, buttons, footer, nav active)</small></label>
+                <label>Accent Colour <small>(header, buttons, footer)</small></label>
                 <div class="setting-row">
                     <input type="color" id="s-accent" value="#4CAF50">
                     <span class="sval" id="sv-accent">#4CAF50</span>
@@ -355,8 +295,7 @@
                 <label>Font Size — <span id="sv-size">16</span>px</label>
                 <div class="setting-row">
                     <span class="sval">12</span>
-                    <input type="range" id="s-size" min="12" max="28" value="16"
-                           oninput="document.getElementById('sv-size').textContent=this.value">
+                    <input type="range" id="s-size" min="12" max="28" value="16" oninput="document.getElementById('sv-size').textContent=this.value">
                     <span class="sval">28</span>
                 </div>
             </div>
@@ -402,8 +341,7 @@
                 <label>Logo Size — <span id="sv-logosize">72</span>px</label>
                 <div class="setting-row">
                     <span class="sval">36</span>
-                    <input type="range" id="s-logosize" min="36" max="120" value="72"
-                           oninput="document.getElementById('sv-logosize').textContent=this.value">
+                    <input type="range" id="s-logosize" min="36" max="120" value="72" oninput="document.getElementById('sv-logosize').textContent=this.value">
                     <span class="sval">120</span>
                 </div>
             </div>
@@ -443,7 +381,7 @@
                 </select>
             </div>
             <div class="setting-group">
-                <label>Search Bar Placeholder Text</label>
+                <label>Search Bar Placeholder</label>
                 <input type="text" id="s-placeholder" placeholder="Search the web...">
             </div>
         </div>
@@ -475,8 +413,7 @@
                 <label>Snippet Opacity — <span id="sv-opacity">80</span>%</label>
                 <div class="setting-row">
                     <span class="sval">30</span>
-                    <input type="range" id="s-opacity" min="30" max="100" value="80"
-                           oninput="document.getElementById('sv-opacity').textContent=this.value">
+                    <input type="range" id="s-opacity" min="30" max="100" value="80" oninput="document.getElementById('sv-opacity').textContent=this.value">
                     <span class="sval">100</span>
                 </div>
             </div>
@@ -484,9 +421,8 @@
                 <label>Search Bar Width — <span id="sv-searchwidth">60</span>%</label>
                 <div class="setting-row">
                     <span class="sval">30</span>
-                    <input type="range" id="s-searchwidth" min="30" max="90" value="60"
-                           oninput="document.getElementById('sv-searchwidth').textContent=this.value">
-                    <span class="sval">90</span>
+                    <input type="range" id="s-searchwidth" min="30" max="95" value="60" oninput="document.getElementById('sv-searchwidth').textContent=this.value">
+                    <span class="sval">95</span>
                 </div>
             </div>
         </div>
@@ -499,67 +435,55 @@
 
 </div>
 
-<footer>
-    <p id="footer-text">&#169; Liam Stephenson 2024. All rights reserved.</p>
-</footer>
+<footer><p id="footer-text">&#169; Liam Stephenson 2024. All rights reserved.</p></footer>
 
 <script>
-// ── State ──
 var cfg = {
-    target:         '_blank',
-    maxResults:     10,
-    showFavicons:   true,
-    snippetOpacity: 0.8,
-    shadow:         '0 2px 6px rgba(0,0,0,0.1)'
+    target: '_blank', maxResults: 10,
+    showFavicons: true, snippetOpacity: 0.8,
+    shadow: '0 2px 6px rgba(0,0,0,0.1)'
 };
 
-// ── Cross-browser timeout fetch ──
-function fetchWithTimeout(url, ms) {
-    var done = false;
-    var controller = (typeof AbortController !== 'undefined') ? new AbortController() : null;
-    var opts = controller ? { signal: controller.signal } : {};
-    var timer = setTimeout(function() {
-        done = true;
-        if (controller) controller.abort();
-    }, ms);
-    return fetch(url, opts).then(function(r) {
-        clearTimeout(timer);
-        return r;
-    }, function(e) {
-        clearTimeout(timer);
-        throw e;
-    });
+/* ── Cross-browser fetch with timeout ── */
+function fetchT(url, ms) {
+    var ctrl = typeof AbortController !== 'undefined' ? new AbortController() : null;
+    var opts = ctrl ? { signal: ctrl.signal } : {};
+    var t = setTimeout(function() { if (ctrl) ctrl.abort(); }, ms);
+    return fetch(url, opts).then(
+        function(r) { clearTimeout(t); return r; },
+        function(e) { clearTimeout(t); throw e; }
+    );
 }
 
-// ── Navigation ──
+/* ── Navigation ── */
 var PAGES = ['home','about','download','settings'];
 function showPage(page) {
-    for (var i = 0; i < PAGES.length; i++) {
-        var el = document.getElementById(PAGES[i]);
-        if (el) el.className = PAGES[i] === page ? 'page active' : 'page';
-    }
+    PAGES.forEach(function(id) {
+        var el = document.getElementById(id);
+        if (el) el.className = id === page ? 'page active' : 'page';
+    });
     var links = document.querySelectorAll('#mainnav a');
-    for (var j = 0; j < links.length; j++) {
-        var oc = links[j].getAttribute('onclick') || '';
-        links[j].className = (oc.indexOf("'" + page + "'") !== -1) ? 'active' : '';
+    for (var i = 0; i < links.length; i++) {
+        var oc = links[i].getAttribute('onclick') || '';
+        links[i].className = oc.indexOf("'" + page + "'") !== -1 ? 'active' : '';
     }
 }
 showPage('home');
 
-// ── Settings sub-tabs ──
+/* ── Settings sub-tabs ── */
 function showStab(name, btn) {
     var panels = document.querySelectorAll('.stab-panel');
     for (var i = 0; i < panels.length; i++) panels[i].className = 'stab-panel';
-    var stabs  = document.querySelectorAll('.stab');
-    for (var i = 0; i < stabs.length; i++)  stabs[i].className  = 'stab';
+    var stabs = document.querySelectorAll('.stab');
+    for (var i = 0; i < stabs.length; i++) stabs[i].className = 'stab';
     var p = document.getElementById('stab-' + name);
     if (p) p.className = 'stab-panel active';
     btn.className = 'stab active';
 }
 
-// ── Apply Settings ──
+/* ── Apply Settings ── */
 function applySettings() {
-    var root      = document.documentElement;
+    var root = document.documentElement;
     var accent    = document.getElementById('s-accent').value;
     var navcolor  = document.getElementById('s-navcolor').value;
     var linkcolor = document.getElementById('s-linkcolor').value;
@@ -579,9 +503,8 @@ function applySettings() {
     var opacity   = parseInt(document.getElementById('s-opacity').value, 10) / 100;
     var sw        = document.getElementById('s-searchwidth').value + '%';
     var title     = document.getElementById('s-title').value.trim();
-    var placeholder = document.getElementById('s-placeholder').value.trim();
+    var ph        = document.getElementById('s-placeholder').value.trim();
 
-    // CSS variables
     root.style.setProperty('--accent',          accent);
     root.style.setProperty('--accent-dark',      shadeColor(accent, -10));
     root.style.setProperty('--nav-bg',           navcolor);
@@ -593,7 +516,6 @@ function applySettings() {
     root.style.setProperty('--container-width',  width);
     root.style.setProperty('--spacing',          spacing);
 
-    // Theme — set variables explicitly so they always win
     if (theme === 'dark') {
         document.body.className = 'dark';
         root.style.setProperty('--body-bg',   '#1a1a1a');
@@ -606,28 +528,24 @@ function applySettings() {
         root.style.setProperty('--result-bg', '#ffffff');
     }
 
-    // Background image
     document.body.style.backgroundImage = bg ? "url('" + bg + "')" : '';
 
-    // Logo size
     var logo = document.querySelector('.ligma-logo');
     if (logo) logo.style.fontSize = logosize;
 
-    // Search bar width
-    var qinput = document.getElementById('query');
-    if (qinput) qinput.style.width = sw;
+    var srow = document.querySelector('.search-row');
+    if (srow) srow.style.width = sw;
 
-    // Nav link size
     var navLinks = document.querySelectorAll('#mainnav a');
     for (var i = 0; i < navLinks.length; i++) navLinks[i].style.fontSize = navsize;
 
-    // Texts
     if (header) document.getElementById('header-text').textContent = header;
     if (footer) document.getElementById('footer-text').textContent = footer;
     if (title)  document.title = title;
-    if (placeholder) qinput.placeholder = placeholder;
 
-    // Runtime config
+    var q = document.getElementById('query');
+    if (q && ph) q.placeholder = ph;
+
     cfg.target         = document.getElementById('s-target').value;
     cfg.maxResults     = parseInt(document.getElementById('s-results').value, 10);
     cfg.showFavicons   = document.getElementById('s-favicons').value === 'yes';
@@ -639,38 +557,30 @@ function applySettings() {
 
 function resetSettings() {
     var root = document.documentElement;
-    var defaults = {
-        '--accent':         '#4CAF50',
-        '--accent-dark':    '#45a049',
-        '--nav-bg':         '#333333',
-        '--link-color':     '#1a0dab',
-        '--url-color':      '#006621',
-        '--font-family':    'Arial, sans-serif',
-        '--font-size':      '16px',
-        '--border-radius':  '8px',
-        '--container-width':'900px',
-        '--spacing':        '20px',
-        '--body-bg':        '#ffffff',
-        '--body-color':     '#000000',
-        '--result-bg':      '#ffffff'
+    var defs = {
+        '--accent':'#4CAF50','--accent-dark':'#45a049','--nav-bg':'#333333',
+        '--link-color':'#1a0dab','--url-color':'#006621',
+        '--font-family':'Arial, sans-serif','--font-size':'16px',
+        '--border-radius':'8px','--container-width':'900px','--spacing':'20px',
+        '--body-bg':'#ffffff','--body-color':'#000000','--result-bg':'#ffffff'
     };
-    for (var k in defaults) root.style.setProperty(k, defaults[k]);
+    for (var k in defs) root.style.setProperty(k, defs[k]);
     document.body.className = '';
     document.body.style.backgroundImage = '';
 
     var logo = document.querySelector('.ligma-logo');
     if (logo) logo.style.fontSize = '72px';
-    var qinput = document.getElementById('query');
-    if (qinput) { qinput.style.width = '60%'; qinput.placeholder = 'Search the web...'; }
-
+    var srow = document.querySelector('.search-row');
+    if (srow) srow.style.width = '60%';
     var navLinks = document.querySelectorAll('#mainnav a');
     for (var i = 0; i < navLinks.length; i++) navLinks[i].style.fontSize = '14px';
 
     document.getElementById('header-text').textContent = 'Welcome to Ligma Browser Home Page';
     document.getElementById('footer-text').textContent = '\u00a9 Liam Stephenson 2024. All rights reserved.';
     document.title = 'Ligma Browser';
+    var q = document.getElementById('query');
+    if (q) q.placeholder = 'Search the web...';
 
-    // Reset inputs
     var resets = {
         's-theme':'light','s-accent':'#4CAF50','s-navcolor':'#333333',
         's-linkcolor':'#1a0dab','s-urlcolor':'#006621','s-font':'Arial, sans-serif',
@@ -679,34 +589,31 @@ function resetSettings() {
         's-favicons':'yes','s-placeholder':'','s-title':'','s-navsize':'14px',
         's-shadow':'0 2px 6px rgba(0,0,0,0.1)'
     };
-    for (var id in resets) {
-        var el = document.getElementById(id);
-        if (el) el.value = resets[id];
-    }
-    document.getElementById('s-size').value = '16';
-    document.getElementById('sv-size').textContent = '16';
-    document.getElementById('s-logosize').value = '72';
-    document.getElementById('sv-logosize').textContent = '72';
-    document.getElementById('s-opacity').value = '80';
-    document.getElementById('sv-opacity').textContent = '80';
-    document.getElementById('s-searchwidth').value = '60';
-    document.getElementById('sv-searchwidth').textContent = '60';
+    for (var id in resets) { var el = document.getElementById(id); if (el) el.value = resets[id]; }
 
-    // Reset span labels
-    var spanMap = {'s-accent':'sv-accent','s-navcolor':'sv-navcolor','s-linkcolor':'sv-linkcolor','s-urlcolor':'sv-urlcolor'};
-    for (var sid in spanMap) {
-        var sv = document.getElementById(spanMap[sid]);
-        var se = document.getElementById(sid);
-        if (sv && se) sv.textContent = se.value;
-    }
+    var ranges = [['s-size','sv-size','16'],['s-logosize','sv-logosize','72'],
+                  ['s-opacity','sv-opacity','80'],['s-searchwidth','sv-searchwidth','60']];
+    ranges.forEach(function(r) {
+        var el = document.getElementById(r[0]);
+        var sp = document.getElementById(r[1]);
+        if (el) el.value = r[2];
+        if (sp) sp.textContent = r[2];
+    });
+
+    var colorPairs = [['s-accent','sv-accent'],['s-navcolor','sv-navcolor'],
+                      ['s-linkcolor','sv-linkcolor'],['s-urlcolor','sv-urlcolor']];
+    colorPairs.forEach(function(p) {
+        var inp = document.getElementById(p[0]);
+        var spn = document.getElementById(p[1]);
+        if (inp && spn) spn.textContent = inp.value;
+    });
 
     cfg = { target:'_blank', maxResults:10, showFavicons:true, snippetOpacity:0.8, shadow:'0 2px 6px rgba(0,0,0,0.1)' };
 }
 
-// Live colour label updates
 (function() {
-    var pairs = [['s-accent','sv-accent'],['s-navcolor','sv-navcolor'],['s-linkcolor','sv-linkcolor'],['s-urlcolor','sv-urlcolor']];
-    pairs.forEach(function(p) {
+    [['s-accent','sv-accent'],['s-navcolor','sv-navcolor'],
+     ['s-linkcolor','sv-linkcolor'],['s-urlcolor','sv-urlcolor']].forEach(function(p) {
         var inp = document.getElementById(p[0]);
         var spn = document.getElementById(p[1]);
         if (inp && spn) inp.addEventListener('input', function() { spn.textContent = this.value; });
@@ -715,68 +622,73 @@ function resetSettings() {
 
 function shadeColor(hex, pct) {
     var n = parseInt(hex.replace('#',''), 16);
-    var r = Math.min(255, Math.max(0, (n >> 16)        + pct));
-    var g = Math.min(255, Math.max(0, ((n >> 8) & 0xff)+ pct));
-    var b = Math.min(255, Math.max(0, (n & 0xff)       + pct));
-    return '#' + [r,g,b].map(function(v){ return ('0'+v.toString(16)).slice(-2); }).join('');
+    var r = Math.min(255, Math.max(0, (n >> 16) + pct));
+    var g = Math.min(255, Math.max(0, ((n >> 8) & 0xff) + pct));
+    var b = Math.min(255, Math.max(0, (n & 0xff) + pct));
+    return '#' + [r,g,b].map(function(v) { return ('0'+v.toString(16)).slice(-2); }).join('');
 }
 
-// ── Search ──
+/* ── Search — races 6 proxies, first valid wins ── */
 var searchCache = {};
 
 function fetchSearch(query) {
     var key = query.toLowerCase().trim();
     if (searchCache[key]) return Promise.resolve(searchCache[key]);
 
-    var q   = encodeURIComponent(query);
-    var ddg = 'https://html.duckduckgo.com/html/?q=' + q;
+    var ddg = 'https://html.duckduckgo.com/html/?q=' + encodeURIComponent(query);
+    var enc = encodeURIComponent(ddg);
 
-    // Each proxy as a function so they all start at the same time
-    var proxies = [
+    /* Six different proxy approaches fired simultaneously */
+    var attempts = [
+        /* 1. allorigins JSON wrapper — most reliable */
         function() {
-            // allorigins — most reliable, returns JSON
-            return fetchWithTimeout('https://api.allorigins.win/get?url=' + encodeURIComponent(ddg), 9000)
+            return fetchT('https://api.allorigins.win/get?url=' + enc, 10000)
                 .then(function(r) { if (!r.ok) throw 0; return r.json(); })
                 .then(function(d) {
-                    if (!d || !d.contents) throw 0;
-                    if (d.contents.indexOf('result__a') === -1) throw 0;
+                    if (!d || !d.contents || d.contents.indexOf('result__a') < 0) throw 0;
                     return d.contents;
                 });
         },
+        /* 2. allorigins raw */
         function() {
-            // corsproxy.io
-            return fetchWithTimeout('https://corsproxy.io/?' + encodeURIComponent(ddg), 9000)
+            return fetchT('https://api.allorigins.win/raw?url=' + enc, 10000)
                 .then(function(r) { if (!r.ok) throw 0; return r.text(); })
-                .then(function(t) { if (t.indexOf('result__a') === -1) throw 0; return t; });
+                .then(function(t) { if (t.indexOf('result__a') < 0) throw 0; return t; });
         },
+        /* 3. corsproxy.io encoded */
         function() {
-            // jsonp.afeld.me — lightweight proxy
-            return fetchWithTimeout('https://jsonp.afeld.me/?url=' + encodeURIComponent(ddg), 9000)
+            return fetchT('https://corsproxy.io/?' + enc, 10000)
                 .then(function(r) { if (!r.ok) throw 0; return r.text(); })
-                .then(function(t) { if (t.indexOf('result__a') === -1) throw 0; return t; });
+                .then(function(t) { if (t.indexOf('result__a') < 0) throw 0; return t; });
         },
+        /* 4. corsproxy.io unencoded */
         function() {
-            // Use allorigins raw endpoint as secondary attempt
-            return fetchWithTimeout('https://api.allorigins.win/raw?url=' + encodeURIComponent(ddg), 9000)
+            return fetchT('https://corsproxy.io/?' + ddg, 10000)
                 .then(function(r) { if (!r.ok) throw 0; return r.text(); })
-                .then(function(t) { if (t.indexOf('result__a') === -1) throw 0; return t; });
+                .then(function(t) { if (t.indexOf('result__a') < 0) throw 0; return t; });
         },
+        /* 5. codetabs */
         function() {
-            // corsproxy.io without encoding (some queries work better this way)
-            return fetchWithTimeout('https://corsproxy.io/?' + ddg, 9000)
+            return fetchT('https://api.codetabs.com/v1/proxy?quest=' + enc, 10000)
                 .then(function(r) { if (!r.ok) throw 0; return r.text(); })
-                .then(function(t) { if (t.indexOf('result__a') === -1) throw 0; return t; });
+                .then(function(t) { if (t.indexOf('result__a') < 0) throw 0; return t; });
+        },
+        /* 6. htmldriven cors-anywhere public demo */
+        function() {
+            return fetchT('https://cors-anywhere.herokuapp.com/' + ddg, 10000)
+                .then(function(r) { if (!r.ok) throw 0; return r.text(); })
+                .then(function(t) { if (t.indexOf('result__a') < 0) throw 0; return t; });
         }
     ];
 
     return new Promise(function(resolve, reject) {
-        var done = false, fails = 0, total = proxies.length;
-        proxies.forEach(function(fn) {
+        var done = false, fails = 0;
+        attempts.forEach(function(fn) {
             fn().then(function(html) {
                 if (!done) { done = true; searchCache[key] = html; resolve(html); }
             }).catch(function() {
                 fails++;
-                if (fails === total && !done) reject(new Error('all failed'));
+                if (fails === attempts.length && !done) reject();
             });
         });
     });
@@ -789,44 +701,28 @@ function parseDDG(html) {
     var out   = [];
     for (var i = 0; i < links.length; i++) {
         var href = links[i].getAttribute('href') || '';
-        if (href.indexOf('uddg=') !== -1) {
-            try { href = decodeURIComponent(href.split('uddg=')[1]); } catch(e) {}
-        }
+        if (href.indexOf('uddg=') >= 0) { try { href = decodeURIComponent(href.split('uddg=')[1]); } catch(e) {} }
         href = href.split('&rut=')[0];
-        if (href.indexOf('https%3A') === 0 || href.indexOf('http%3A') === 0) {
-            try { href = decodeURIComponent(href); } catch(e) {}
-        }
+        if (href.indexOf('https%3A') === 0 || href.indexOf('http%3A') === 0) { try { href = decodeURIComponent(href); } catch(e) {} }
         if (href.indexOf('http') !== 0) continue;
         var host = '';
         try { host = new URL(href).hostname.replace(/^www\./, ''); } catch(e) {}
-        out.push({
-            title:   links[i].textContent.trim(),
-            href:    href,
-            host:    host,
-            snippet: snips[i] ? snips[i].textContent.trim() : ''
-        });
+        out.push({ title: links[i].textContent.trim(), href: href, host: host, snippet: snips[i] ? snips[i].textContent.trim() : '' });
     }
     return out;
 }
 
 function doSearch() {
-    var query  = document.getElementById('query').value.trim();
-    var rDiv   = document.getElementById('results');
+    var query = document.getElementById('query').value.trim();
+    var rDiv  = document.getElementById('results');
     if (!query) { alert('Enter a search term!'); return; }
 
-    rDiv.innerHTML =
-        '<div class="loading">' +
-            '<div class="spinner"></div>' +
-            '<div>Searching for <strong>' + escHtml(query) + '</strong>...</div>' +
-        '</div>';
+    rDiv.innerHTML = '<div class="loading"><div class="spinner"></div><div>Searching for <strong>' + escHtml(query) + '</strong>...</div></div>';
 
     fetchSearch(query).then(function(html) {
         var items = parseDDG(html).slice(0, cfg.maxResults);
         rDiv.innerHTML = '';
-        if (!items.length) {
-            rDiv.innerHTML = '<p style="text-align:center">No results found.</p>';
-            return;
-        }
+        if (!items.length) { rDiv.innerHTML = '<p style="text-align:center">No results found.</p>'; return; }
         var frag = document.createDocumentFragment();
         items.forEach(function(r) {
             var wrap = document.createElement('div');
@@ -846,54 +742,39 @@ function doSearch() {
             }
 
             var a = document.createElement('a');
-            a.href   = r.href;
-            a.target = cfg.target;
-            a.rel    = 'noopener noreferrer';
+            a.href = r.href; a.target = cfg.target; a.rel = 'noopener noreferrer';
             a.textContent = r.title;
             row.appendChild(a);
 
-            var url = document.createElement('div');
-            url.className   = 'result-url';
-            url.textContent = r.host;
+            var urlEl = document.createElement('div');
+            urlEl.className = 'result-url';
+            urlEl.textContent = r.host;
 
             var p = document.createElement('p');
-            p.textContent  = r.snippet;
+            p.textContent = r.snippet;
             p.style.opacity = cfg.snippetOpacity;
 
-            wrap.appendChild(row);
-            wrap.appendChild(url);
-            wrap.appendChild(p);
+            wrap.appendChild(row); wrap.appendChild(urlEl); wrap.appendChild(p);
             frag.appendChild(wrap);
         });
         rDiv.appendChild(frag);
     }).catch(function() {
-        rDiv.innerHTML =
-            '<p style="text-align:center">Search failed &mdash; ' +
-            'all sources unavailable. Please try again in a moment.</p>';
+        rDiv.innerHTML = '<p style="text-align:center">Search failed — all sources unavailable. Please try again.</p>';
     });
 }
 
-// Prefetch on typing
 var pfTimer = null;
 var qEl = document.getElementById('query');
 if (qEl && qEl.addEventListener) {
     qEl.addEventListener('input', function() {
         clearTimeout(pfTimer);
         var v = this.value.trim();
-        if (v.length > 3) {
-            pfTimer = setTimeout(function() {
-                fetchSearch(v).catch(function() {});
-            }, 400);
-        }
+        if (v.length > 3) pfTimer = setTimeout(function() { fetchSearch(v).catch(function(){}); }, 400);
     });
 }
 
 function escHtml(s) {
-    return ('' + s)
-        .replace(/&/g, '&amp;')
-        .replace(/</g, '&lt;')
-        .replace(/>/g, '&gt;')
-        .replace(/"/g, '&quot;');
+    return ('' + s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
 }
 </script>
 </body>
