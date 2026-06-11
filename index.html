@@ -626,7 +626,7 @@ function fetchSearch(query) {
     var key = query.toLowerCase().trim();
     if (searchCache[key]) return Promise.resolve(searchCache[key]);
 
-    var workerUrl = 'https://duckduckligma.vj4ytdg6sw.workers.dev/?q=' + encodeURIComponent(query);
+    var workerUrl = 'https://duckduckligma.vj4ytdg6sw.workers.dev/?q=' + encodeURIComponent(query).replace(/%20/g, '+');
 
     return fetchT(workerUrl, 15000)
         .then(function(r) { if (!r.ok) throw 0; return r.text(); })
