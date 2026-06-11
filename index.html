@@ -646,21 +646,23 @@ function buildResults(html, query) {
        The real URL is base64 encoded in the &u= param, prefixed with "a1" */
     function decodeBingUrl(href) {
         if (!href) return null;
-        try {
-            var u = new URL(href);
-            if (u.hostname.indexOf('bing.com') !== -1 && u.pathname.indexOf('/ck/a') !== -1) {
-                var uParam = u.searchParams.get('u');
-                if (uParam && uParam.indexOf('a1') === 0) {
-                    var b64 = uParam.slice(2);
-                    b64 = b64.replace(/-/g, '+').replace(/_/g, '/');
-                    /* Add padding */
+        /* Bing redirect URLs contain /ck/a and &u=a1BASE64 */
+        if (href.indexOf('bing.com/ck/a') !== -1) {
+            var match = href.match(/[?&]u=a1([A-Za-z0-9+/=_-]+)/);
+            if (match) {
+                try {
+                    var b64 = match[1].replace(/-/g, '+').replace(/_/g, '/');
                     while (b64.length % 4 !== 0) b64 += '=';
                     var decoded = atob(b64);
                     if (decoded.indexOf('http') === 0) return decoded;
-                }
+                } catch(e) {}
             }
-        } catch(e) {}
-        if (href.indexOf('http') === 0 && href.indexOf('bing.com') === -1 && href.indexOf('microsoft.com') === -1) {
+            return null;
+        }
+        /* Regular URL — return if not bing/microsoft */
+        if (href.indexOf('http') === 0 &&
+            href.indexOf('bing.com') === -1 &&
+            href.indexOf('microsoft.com') === -1) {
             return href;
         }
         return null;
