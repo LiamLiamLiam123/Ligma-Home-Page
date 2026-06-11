@@ -631,7 +631,7 @@ function fetchSearch(query) {
     return fetchT(workerUrl, 10000)
         .then(function(r) { if (!r.ok) throw 0; return r.text(); })
         .then(function(html) {
-            if (html.indexOf('b_algo') < 0 && html.indexOf('result__a') < 0) throw 0;
+            if (html.indexOf('b_algo') < 0) throw 0;
             searchCache[key] = html;
             return html;
         });
@@ -642,26 +642,47 @@ function buildResults(html, query) {
     var items = [];
     var seen  = {};
 
-    function addItem(title, href, snippet) {
-        if (!title || !href) return;
-        if (href.indexOf('bing.com') !== -1) return;
-        if (href.indexOf('microsoft.com') !== -1) return;
-        if (href.indexOf('http') !== 0) return;
-        if (seen[href]) return;
-        seen[href] = true;
-        var host = '';
-        try { host = new URL(href).hostname.replace(/^www\./, ''); } catch(e) {}
-        items.push({ title: title, href: href, host: host, snippet: snippet || '' });
+    /* Bing wraps real URLs in https://www.bing.com/ck/a?...&u=a1BASE64ENCODEDURL&ntb=1
+       The real URL is base64 encoded in the &u= param, prefixed with "a1" */
+    function decodeBingUrl(href) {
+        if (!href) return null;
+        try {
+            var u = new URL(href);
+            if (u.hostname.indexOf('bing.com') !== -1 && u.pathname.indexOf('/ck/a') !== -1) {
+                var uParam = u.searchParams.get('u');
+                if (uParam && uParam.indexOf('a1') === 0) {
+                    /* Remove the "a1" prefix then base64 decode */
+                    var b64 = uParam.slice(2);
+                    /* base64url to base64 */
+                    b64 = b64.replace(/-/g, '+').replace(/_/g, '/');
+                    var decoded = atob(b64);
+                    if (decoded.indexOf('http') === 0) return decoded;
+                }
+            }
+        } catch(e) {}
+        /* Not a Bing redirect — return as-is if it's a real URL */
+        if (href.indexOf('http') === 0 && href.indexOf('bing.com') === -1 && href.indexOf('microsoft.com') === -1) {
+            return href;
+        }
+        return null;
     }
 
-    /* Bing result format: li.b_algo contains h2 > a and p.b_lineclamp2 */
+    function addItem(title, href, snippet) {
+        var real = decodeBingUrl(href);
+        if (!real || !title) return;
+        if (seen[real]) return;
+        seen[real] = true;
+        var host = '';
+        try { host = new URL(real).hostname.replace(/^www\./, ''); } catch(e) {}
+        items.push({ title: title, href: real, host: host, snippet: snippet || '' });
+    }
+
+    /* Bing result format: li.b_algo h2 a */
     var results = doc.querySelectorAll('li.b_algo');
     for (var i = 0; i < results.length; i++) {
         var a       = results[i].querySelector('h2 a');
         var snippet = results[i].querySelector('p, .b_lineclamp2, .b_lineclamp3, .b_lineclamp4');
-        if (a && a.getAttribute('href')) {
-            addItem(a.textContent.trim(), a.getAttribute('href'), snippet ? snippet.textContent.trim() : '');
-        }
+        if (a) addItem(a.textContent.trim(), a.getAttribute('href'), snippet ? snippet.textContent.trim() : '');
     }
 
     return items;
