@@ -628,7 +628,7 @@ function fetchSearch(query) {
 
     var workerUrl = 'https://duckduckligma.vj4ytdg6sw.workers.dev/?q=' + encodeURIComponent(query);
 
-    return fetchT(workerUrl, 10000)
+    return fetchT(workerUrl, 15000)
         .then(function(r) { if (!r.ok) throw 0; return r.text(); })
         .then(function(html) {
             if (html.indexOf('b_algo') < 0) throw 0;
