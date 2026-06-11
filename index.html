@@ -626,90 +626,27 @@ function fetchSearch(query) {
     var key = query.toLowerCase().trim();
     if (searchCache[key]) return Promise.resolve(searchCache[key]);
 
-    var workerUrl = 'https://duckduckligma.vj4ytdg6sw.workers.dev/?q=' + encodeURIComponent(query);
+    /* skip_disambig=0 returns more data, no_redirect=1 follows through */
+    var url = 'https://api.duckduckgo.com/?q=' + encodeURIComponent(query) +
+              '&format=json&no_redirect=1&no_html=1&skip_disambig=0&t=ligmabrowser';
 
-    return fetchT(workerUrl, 15000)
-        .then(function(r) { if (!r.ok) throw 0; return r.text(); })
-        .then(function(html) {
-            if (html.indexOf('b_algo') < 0) throw 0;
-            searchCache[key] = html;
-            return html;
-        });
-}
-
-function buildResults(html, query) {
-    var doc   = new DOMParser().parseFromString(html, 'text/html');
-    var items = [];
-    var seen  = {};
-
-    /* Bing wraps real URLs in https://www.bing.com/ck/a?...&u=a1BASE64ENCODEDURL&ntb=1
-       The real URL is base64 encoded in the &u= param, prefixed with "a1" */
-    function decodeBingUrl(href) {
-        if (!href) return null;
-        /* Bing redirect URLs contain /ck/a and &u=a1BASE64 */
-        if (href.indexOf('bing.com/ck/a') !== -1) {
-            var match = href.match(/[?&]u=a1([A-Za-z0-9+/=_-]+)/);
-            if (match) {
-                try {
-                    var b64 = match[1].replace(/-/g, '+').replace(/_/g, '/');
-                    while (b64.length % 4 !== 0) b64 += '=';
-                    var decoded = atob(b64);
-                    if (decoded.indexOf('http') === 0) return decoded;
-                } catch(e) {}
-            }
-            return null;
-        }
-        /* Regular URL — return if not bing/microsoft */
-        if (href.indexOf('http') === 0 &&
-            href.indexOf('bing.com') === -1 &&
-            href.indexOf('microsoft.com') === -1) {
-            return href;
-        }
-        return null;
-    }
-
-    function addItem(title, href, snippet) {
-        var real = decodeBingUrl(href);
-        if (!real || !title) return;
-        if (seen[real]) return;
-        seen[real] = true;
-        var host = '';
-        try { host = new URL(real).hostname.replace(/^www\./, ''); } catch(e) {}
-        items.push({ title: title, href: real, host: host, snippet: snippet || '' });
-    }
-
-    /* Bing result format: li.b_algo h2 a */
-    var results = doc.querySelectorAll('li.b_algo');
-    for (var i = 0; i < results.length; i++) {
-        var a       = results[i].querySelector('h2 a');
-        var snippet = results[i].querySelector('p, .b_lineclamp2, .b_lineclamp3, .b_lineclamp4');
-        if (a) addItem(a.textContent.trim(), a.getAttribute('href'), snippet ? snippet.textContent.trim() : '');
-    }
-
-    return items;
+    return fetchT(url, 8000)
+        .then(function(r) { if (!r.ok) throw 0; return r.json(); })
+        .then(function(d) { searchCache[key] = d; return d; });
 }
 
 function buildResults(data, query) {
     var items = [];
     var seen  = {};
 
-    /* Discard ANY duckduckgo.com URL unconditionally */
-    function unwrap(href) {
-        if (!href) return null;
-        if (href.indexOf('duckduckgo.com') !== -1) return null;
-        return href;
-    }
-
     function add(title, href, host, snippet) {
-        href = unwrap(href);
         if (!title) return;
-        if (!href) return; /* skip DDG search redirects */
-        if (seen[href]) return;
-        seen[href] = true;
+        if (href && seen[href]) return;
+        if (href) seen[href] = true;
         if (!host && href) {
             try { host = new URL(href).hostname.replace(/^www\./, ''); } catch(e) {}
         }
-        items.push({ title: title, href: href, host: host || '', snippet: snippet || '' });
+        items.push({ title: title, href: href || null, host: host || '', snippet: snippet || '' });
     }
 
     /* 1. Direct answer */
@@ -770,8 +707,8 @@ function doSearch() {
 
     rDiv.innerHTML = '<div class="loading"><div class="spinner"></div><div>Searching for <strong>' + escHtml(query) + '</strong>...</div></div>';
 
-    fetchSearch(query).then(function(html) {
-        var items = buildResults(html, query).slice(0, cfg.maxResults);
+    fetchSearch(query).then(function(data) {
+        var items = buildResults(data, query).slice(0, cfg.maxResults);
         rDiv.innerHTML = '';
 
         if (!items.length) {
